@@ -1,0 +1,28 @@
+{
+  "name": "@void/ui",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./appearance": "./src/appearance.tsx",
+    "./brand": "./src/brand.tsx",
+    "./components": "./src/components.tsx",
+    "./navigation": "./src/navigation.tsx",
+    "./motion": "./src/motion.tsx",
+    "./footer": "./src/footer.tsx",
+    "./interactive": "./src/interactive.tsx",
+    "./scene": "./src/scene.tsx",
+    "./brand-image-data": "./src/brand-image-data.ts"
+  },
+  "dependencies": {
+    "@void/shared": "*",
+    "framer-motion": "^12.23.24",
+    "gsap": "^3.13.0",
+    "lucide-react": "^0.468.0"
+  },
+  "peerDependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "next": "^16.4.4"
+  }
+}

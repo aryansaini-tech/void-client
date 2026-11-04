@@ -1,0 +1,52 @@
+{
+  "name": "void-client",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "backend"
+  ],
+  "engines": {
+    "node": ">=22.15.0 <27"
+  },
+  "scripts": {
+    "brand:prepare": "node scripts/prepare-brand.mjs",
+    "setup": "npm install && npm run db:generate",
+    "dev": "node scripts/workspaces.mjs dev",
+    "dev:website": "npm run dev --workspace=@void/website",
+    "dev:account": "npm run dev --workspace=@void/account",
+    "dev:store": "npm run dev --workspace=@void/store",
+    "dev:backend": "npm run dev --workspace=@void/backend",
+    "build": "npm run db:generate && node scripts/workspaces.mjs build",
+    "start": "node scripts/workspaces.mjs start",
+    "lint": "eslint apps packages backend tests scripts",
+    "typecheck": "npm run db:generate && node scripts/workspaces.mjs typecheck",
+    "test": "node --import ./scripts/register-typescript.mjs --test --test-isolation=none tests/unit/*.test.ts",
+    "test:integration": "node --import ./scripts/register-typescript.mjs --test --test-isolation=none tests/integration/*.test.ts",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "db:generate": "prisma generate --schema backend/prisma/schema.prisma",
+    "db:migrate": "prisma migrate dev --schema backend/prisma/schema.prisma",
+    "db:deploy": "prisma migrate deploy --schema backend/prisma/schema.prisma",
+    "db:seed": "node --env-file-if-exists=.env --import ./scripts/register-typescript.mjs backend/prisma/seed.ts",
+    "db:studio": "prisma studio --schema backend/prisma/schema.prisma",
+    "check:config": "node --env-file-if-exists=.env --import ./scripts/register-typescript.mjs scripts/check-config.ts",
+    "test:http": "node --import ./scripts/register-typescript.mjs --test --test-isolation=none tests/smoke/*.test.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.1",
+    "@types/node": "^22.20.1",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.4.4",
+    "prisma": "6.19.3",
+    "tsx": "^4.20.6",
+    "typescript": "5.9.3",
+    "typescript-eslint": "^8.46.0",
+    "zod": "3.25.76",
+    "sharp": "0.35.5"
+  }
+}

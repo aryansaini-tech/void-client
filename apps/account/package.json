@@ -1,0 +1,31 @@
+{
+  "name": "@void/account",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev -p 3001",
+    "build": "next build",
+    "start": "node ../../scripts/start-app.mjs account",
+    "typecheck": "next typegen && tsc --noEmit"
+  },
+  "dependencies": {
+    "@void/ui": "*",
+    "@void/shared": "*",
+    "@void/design-system": "*",
+    "@void/config": "*",
+    "@fontsource-variable/manrope": "^5.2.8",
+    "next": "16.4.4",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "lucide-react": "^0.468.0",
+    "@void/backend": "*",
+    "better-auth": "1.7.15",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.19",
+    "postcss": "^8.5.6",
+    "autoprefixer": "^10.4.21"
+  }
+}

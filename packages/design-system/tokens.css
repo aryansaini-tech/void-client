@@ -1,0 +1,180 @@
+@font-face {
+  font-family: 'Monocraft';
+  src: url('/fonts/Monocraft.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ========================================================
+   DEFAULT THEME: BRIGHT / LIGHT MODE (ClickGUI Aesthetic)
+   Fresh Minecraft sky, frosted glass, warm ivory & cream
+   ======================================================== */
+:root {
+  --font-monocraft: 'Monocraft', monospace;
+  color-scheme: light;
+
+  /* Fresh, luminous Minecraft sky & frosted atmosphere */
+  --background: #E5ECF6;
+  --background-light: #F0F4FA;
+  --background-warm: #FAF5EB;
+  --secondary: #ECE4D2;
+  --background-rgb: 229 236 246;
+
+  /* Luxurious ivory, frosted glass & cream surfaces */
+  --surface: #FFFDF9;
+  --surface-secondary: #F6EFE2;
+  --elevated: #FFFFFF;
+  --glass-frosted: rgba(230, 240, 254, 0.85);
+  --glass-warm: rgba(250, 245, 235, 0.92);
+  --glass-panel: rgba(255, 255, 255, 0.75);
+  --glass-panel-elevated: rgba(255, 255, 255, 0.96);
+  --glass-sky: rgba(229, 236, 246, 0.88);
+
+  /* Rich metallic champagne gold */
+  --gold: #C9972E;
+  --gold-metal: #B88422;
+  --gold-deep: #8A6216;
+  --gold-bright: #FFEAA7;
+  --gold-champagne: #F5D685;
+  --amber: #C9972E;
+  --gold-rgb: 201 151 46;
+  --champagne-rgb: 245 214 133;
+
+  /* High contrast dark modern typography */
+  --text: #181B22;
+  --text-secondary: #505D70;
+  --muted: #5F6A7B;
+  --white: #FFFFFF;
+  --text-rgb: 24 27 34;
+  --accent: #896014;
+  --on-gold: #241B09;
+  --surface-hover: #F9F5EB;
+  --surface-tint: #EAF0F8;
+  --input-background: #FFFFFF;
+  --footer-background: #E1E7EF;
+  --danger: #B12B36;
+  --success: #176B50;
+  --focus-ring: #896014;
+  --scene-top: #FFF8E9;
+  --scene-left: #F5EEDD;
+  --scene-left-shade: #EDE2C8;
+  --scene-right: #DED4BD;
+  --scene-edge: #B49A65;
+  --scene-atmosphere: .5;
+
+  /* Borders & Highlights */
+  --border: rgba(69, 82, 103, 0.18);
+  --border-subtle: rgba(69, 82, 103, 0.1);
+  --border-glass: rgba(255, 255, 255, 0.92);
+  --border-gold: rgba(201, 151, 46, 0.52);
+
+  /* Gradients */
+  --gold-gradient: linear-gradient(115deg, #FFEAA7 0%, #F5D685 32%, #C9972E 72%, #B88422 100%);
+  --gold-metallic: linear-gradient(135deg, #FFF3D1 0%, #F5D685 26%, #C9972E 65%, #B88422 88%, #8A6216 100%);
+  --gold-button-gradient: linear-gradient(135deg, #FFEAA7 0%, #F5D685 28%, #C9972E 72%, #B88422 100%);
+  --glass-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.92) 0%, rgba(230, 240, 254, 0.78) 100%);
+  --sky-gradient: linear-gradient(180deg, #E5ECF6 0%, #F0F4FA 55%, #FAF5EB 100%);
+
+  /* Tactile shadows with warm golden reflection */
+  --shadow-sm: 0 2px 8px rgba(24, 38, 64, 0.05);
+  --shadow-card: 0 4px 18px rgba(24, 38, 64, 0.045);
+  --shadow-elevated: 0 14px 36px rgba(24, 38, 64, 0.09);
+  --shadow-gold-glow: 0 0 32px rgba(201, 151, 46, 0.45), 0 4px 18px rgba(184, 132, 34, 0.28);
+  --shadow-gold-pill: 0 0 20px rgba(201, 151, 46, 0.4), 0 2px 8px rgba(184, 132, 34, 0.25);
+
+  /* Transitions & Animation Timing */
+  --ease-out: cubic-bezier(.22, 1, .36, 1);
+  --ease-in-out: cubic-bezier(.65, 0, .35, 1);
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 160ms;
+  --duration-ui: 280ms;
+  --duration-reveal: 800ms;
+  --duration-image: 1100ms;
+  --logo-cycle: 5.2s;
+
+  /* Layout */
+  --radius-sm: 8px;
+  --radius: 14px;
+  --radius-lg: 22px;
+  --container: 1240px;
+  --gutter: clamp(20px, 5vw, 80px);
+  --header-height: 84px;
+}
+
+/* ========================================================
+   DARK MODE THEME (Original Obsidian Void Theme)
+   Deep obsidian surfaces, rich metallic gold & crisp contrast
+   ======================================================== */
+html[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Original dark theme: Obsidian, Charcoal, Pure Void & Luminous Gold */
+  --background: #080706;
+  --background-light: #12100d;
+  --background-warm: #171410;
+  --secondary: #100e0b;
+  --background-rgb: 8 7 6;
+
+  /* Dark surfaces & glass */
+  --surface: #15120f;
+  --surface-secondary: #1c1813;
+  --elevated: #221e18;
+  --glass-frosted: rgba(18, 15, 12, 0.85);
+  --glass-warm: rgba(26, 22, 17, 0.90);
+  --glass-panel: rgba(21, 18, 15, 0.85);
+  --glass-panel-elevated: rgba(28, 24, 19, 0.96);
+  --glass-sky: rgba(16, 14, 11, 0.90);
+
+  /* Gold & Metallic */
+  --gold: #e8bd62;
+  --gold-metal: #c7973e;
+  --gold-deep: #9d7328;
+  --gold-bright: #ffe4a4;
+  --gold-champagne: #f4d084;
+  --amber: #bd801a;
+  --gold-rgb: 232 189 98;
+  --champagne-rgb: 255 228 164;
+
+  /* High contrast typography */
+  --text: #f7f4ea;
+  --text-secondary: #b7b0a3;
+  --muted: #9b9182;
+  --white: #ffffff;
+  --text-rgb: 247 244 234;
+  --accent: #E8BD62;
+  --on-gold: #241B09;
+  --surface-hover: #262018;
+  --surface-tint: #1B1814;
+  --input-background: #15120F;
+  --footer-background: #100E0B;
+  --danger: #FF9299;
+  --success: #86D9B8;
+  --focus-ring: #E8BD62;
+  --scene-top: #302A1F;
+  --scene-left: #242016;
+  --scene-left-shade: #17140E;
+  --scene-right: #100E0B;
+  --scene-edge: #64502E;
+  --scene-atmosphere: .12;
+
+  /* Borders & Highlights */
+  --border: #30291e;
+  --border-subtle: rgba(91, 72, 39, 0.35);
+  --border-glass: rgba(255, 255, 255, 0.12);
+  --border-gold: #5b4827;
+
+  /* Gradients */
+  --gold-gradient: linear-gradient(115deg, #ffe4a4 0%, #e8bd62 48%, #c7973e 100%);
+  --gold-metallic: linear-gradient(135deg, #ffe4a4 0%, #e8bd62 36%, #c7973e 78%, #8d692b 100%);
+  --gold-button-gradient: linear-gradient(135deg, #ffe4a4 0%, #e8bd62 48%, #c7973e 100%);
+  --glass-gradient: linear-gradient(135deg, rgba(28, 24, 19, 0.92) 0%, rgba(16, 14, 11, 0.85) 100%);
+  --sky-gradient: linear-gradient(180deg, #080706 0%, #100e0b 55%, #15120f 100%);
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.45);
+  --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --shadow-elevated: 0 20px 48px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  --shadow-gold-glow: 0 0 32px rgba(232, 189, 98, 0.35), 0 4px 18px rgba(199, 151, 62, 0.25);
+  --shadow-gold-pill: 0 0 20px rgba(232, 189, 98, 0.35), 0 2px 8px rgba(199, 151, 62, 0.22);
+}

@@ -1,0 +1,43 @@
+name: Verify Void
+on: [push, pull_request]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: void_test
+          POSTGRES_PASSWORD: test-only
+          POSTGRES_DB: void_integration_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U void_test -d void_integration_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run db:generate
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run db:deploy
+        env:
+          DATABASE_URL: postgresql://void_test:test-only@localhost:5432/void_integration_test
+      - run: npm run test:integration
+        env:
+          TEST_DATABASE_URL: postgresql://void_test:test-only@localhost:5432/void_integration_test
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium webkit
+      - run: npm run test:e2e
+        env:
+          TEST_DATABASE_URL: postgresql://void_test:test-only@localhost:5432/void_integration_test
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/

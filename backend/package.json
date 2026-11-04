@@ -1,0 +1,7 @@
+{
+  "name":"@void/backend","version":"1.0.0","private":true,"type":"module",
+  "exports":{"./auth":"./src/auth.ts","./database":"./src/database.ts","./env":"./src/env.ts","./catalog":"./src/catalog.ts","./commerce":"./src/commerce.ts","./security":"./src/security.ts","./mail":"./src/mail.ts"},
+  "scripts":{"dev":"node --env-file-if-exists=../.env --import tsx --watch src/server.ts","build":"tsc --project tsconfig.build.json && esbuild src/server.ts --bundle --platform=node --target=node22 --format=esm --packages=external --alias:@void/shared=../packages/shared/src --outfile=dist/server.mjs","start":"node --env-file-if-exists=../.env dist/server.mjs","typecheck":"tsc --noEmit"},
+  "dependencies":{"@void/shared":"*","@prisma/client":"6.19.3","better-auth":"1.7.15","hono":"^4.11.0","@hono/node-server":"^1.19.18","nodemailer":"^7.0.10","stripe":"^20.0.0","zod":"3.25.76"},
+  "devDependencies":{"@types/nodemailer":"^7.0.3","esbuild":"0.28.2","tsx":"^4.20.6"}
+}

@@ -1,0 +1,331 @@
+'use client';
+
+import { createContext, useContext, useEffect, useRef, useSyncExternalStore, type ReactNode } from 'react';
+import { usePathname } from 'next/navigation';
+import { MotionConfig } from 'framer-motion';
+
+const preferenceEvent = 'void:motion-preference';
+const preferenceContext = createContext(false);
+const revealSelector = '[data-reveal], .feature-card, .module-card, .benefit-card, .partner-card, .product-card, .info-card, .portal-card, .download-main, .timeline-entry, .accordion, .gallery-card, .steps-grid > div';
+let sessionPreference: boolean | undefined;
+
+function savedReducedMotion() {
+  try {
+    return localStorage.getItem('void-reduced-motion') === 'true';
+  } catch {
+    return false;
+  }
+}
+
+function motionSnapshot() {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches || (sessionPreference ?? savedReducedMotion());
+}
+
+function subscribeMotion(update: () => void) {
+  const media = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const storage = (event: StorageEvent) => {
+    if (event.key !== null && event.key !== 'void-reduced-motion') return;
+    sessionPreference = undefined;
+    update();
+  };
+  media.addEventListener('change', update);
+  window.addEventListener('storage', storage);
+  window.addEventListener(preferenceEvent, update);
+  return () => {
+    media.removeEventListener('change', update);
+    window.removeEventListener('storage', storage);
+    window.removeEventListener(preferenceEvent, update);
+  };
+}
+
+export function setMotionPreference(reduced: boolean) {
+  sessionPreference = reduced;
+  try {
+    localStorage.setItem('void-reduced-motion', String(reduced));
+  } catch {
+    // The preference still works for this session when storage is unavailable.
+  }
+  window.dispatchEvent(new Event(preferenceEvent));
+}
+
+export function useMotionPreference() {
+  return useContext(preferenceContext);
+}
+
+export function MotionRoot({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  const reduced = useSyncExternalStore(subscribeMotion, motionSnapshot, () => false);
+
+  useEffect(() => {
+    const currentPreference = motionSnapshot();
+    document.documentElement.dataset.reducedMotion = String(currentPreference);
+    const content = document.querySelector('main');
+    if (currentPreference || !content || !('IntersectionObserver' in window)) return;
+
+    const elements = new Set<HTMLElement>();
+    let frame = 0;
+    const observer = new IntersectionObserver(entries => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        (entry.target as HTMLElement).dataset.motion = 'visible';
+        observer.unobserve(entry.target);
+      }
+    }, { threshold: 0, rootMargin: '0px 0px -24px 0px' });
+
+    const scan = () => {
+      frame = 0;
+      for (const element of elements) {
+        if (!element.isConnected) {
+          observer.unobserve(element);
+          elements.delete(element);
+        }
+      }
+
+      // Measure first, then write. Content already on screen never disappears
+      // during hydration, restored scrolling, filtering, or back navigation.
+      const candidates = Array.from(content.querySelectorAll<HTMLElement>(revealSelector))
+        .filter(element => !elements.has(element)
+          && !element.closest('dialog')
+          && !element.parentElement?.closest(revealSelector));
+      const measurements = candidates.map(element => ({
+        element,
+        bounds: element.getBoundingClientRect(),
+      }));
+
+      for (const { element, bounds } of measurements) {
+        if (bounds.height === 0) continue;
+        elements.add(element);
+        if (bounds.top < window.innerHeight - 24 || element.contains(document.activeElement)) {
+          element.dataset.motion = 'settled';
+        } else {
+          element.dataset.motion = 'pending';
+          observer.observe(element);
+        }
+      }
+    };
+
+    const updates = new MutationObserver(records => {
+      if (!frame && records.some(record => record.addedNodes.length || record.removedNodes.length)) {
+        frame = requestAnimationFrame(scan);
+      }
+    });
+    const focus = (event: FocusEvent) => {
+      if (!(event.target instanceof Element)) return;
+      let element = event.target.closest<HTMLElement>('[data-motion]');
+      while (element) {
+        element.dataset.motion = 'settled';
+        observer.unobserve(element);
+        element = element.parentElement?.closest<HTMLElement>('[data-motion]') ?? null;
+      }
+    };
+
+    frame = requestAnimationFrame(scan);
+    updates.observe(content, { childList: true, subtree: true });
+    document.addEventListener('focusin', focus);
+    return () => {
+      cancelAnimationFrame(frame);
+      updates.disconnect();
+      observer.disconnect();
+      document.removeEventListener('focusin', focus);
+      elements.forEach(element => { delete element.dataset.motion; });
+    };
+  }, [pathname, reduced]);
+
+  useEffect(() => {
+    const logos = document.querySelectorAll<HTMLElement>('[data-logo-animated="true"]');
+    const activate = (element: HTMLElement, visible: boolean) => {
+      // Apply the phase to a real element; pseudo-elements cannot be queried.
+      if (visible) element.style.setProperty('--logo-phase', `${-(performance.now() % 5200)}ms`);
+      element.dataset.logoActive = String(visible);
+    };
+    const visibility = () => {
+      document.documentElement.dataset.pageHidden = String(document.hidden);
+      if (!document.hidden) {
+        logos.forEach(element => {
+          if (element.dataset.logoActive === 'true') activate(element, true);
+        });
+      }
+    };
+    const observer = 'IntersectionObserver' in window
+      ? new IntersectionObserver(entries => {
+        entries.forEach(entry => activate(entry.target as HTMLElement, entry.isIntersecting));
+      })
+      : null;
+
+    logos.forEach(element => {
+      if (observer) observer.observe(element);
+      else activate(element, true);
+    });
+    visibility();
+    document.addEventListener('visibilitychange', visibility);
+    return () => {
+      observer?.disconnect();
+      document.removeEventListener('visibilitychange', visibility);
+      logos.forEach(element => {
+        delete element.dataset.logoActive;
+        element.style.removeProperty('--logo-phase');
+      });
+    };
+  }, [pathname, reduced]);
+
+  return (
+    <preferenceContext.Provider value={reduced}>
+      <MotionConfig reducedMotion={reduced ? 'always' : 'user'}>
+        <ScrollEffects />
+        {children}
+      </MotionConfig>
+    </preferenceContext.Provider>
+  );
+}
+
+type DepthItem = {
+  element: HTMLElement;
+  section: HTMLElement;
+  kind: 'hero' | 'showcase' | 'orbit';
+  current: number;
+  target: number;
+};
+
+const clamp = (value: number) => Math.max(0, Math.min(1, value));
+
+/** Native scrolling, one scheduled frame, and no React renders on scroll. */
+function ScrollEffects() {
+  const bar = useRef<HTMLSpanElement>(null);
+  const pathname = usePathname();
+  const reduced = useMotionPreference();
+
+  useEffect(() => {
+    const desktop = window.matchMedia('(min-width: 960px) and (pointer: fine)');
+    let items: DepthItem[] = [];
+    let frame = 0;
+    let dirty = true;
+    let lastTime = 0;
+
+    const paint = (time: number) => {
+      frame = 0;
+      if (document.hidden) return;
+      const elapsed = Math.min(64, lastTime ? time - lastTime : 16);
+      lastTime = time;
+
+      if (dirty) {
+        const viewport = window.innerHeight;
+        const distance = document.documentElement.scrollHeight - viewport;
+        const progress = distance > 0 ? clamp(window.scrollY / distance) : 0;
+        const measurements = items.map(item => ({ item, bounds: item.section.getBoundingClientRect() }));
+
+        for (const { item, bounds } of measurements) {
+          item.target = item.kind === 'hero'
+            ? clamp(-bounds.top / Math.max(1, bounds.height))
+            : item.kind === 'showcase'
+              ? clamp((viewport * .92 - bounds.top) / (viewport * .62))
+              : clamp((viewport - bounds.top) / (viewport + bounds.height));
+          if (!Number.isFinite(item.current)) item.current = item.target;
+        }
+        if (bar.current) bar.current.style.transform = `scaleX(${progress})`;
+        dirty = false;
+      }
+
+      let moving = false;
+      for (const item of items) {
+        const difference = item.target - item.current;
+        item.current = Math.abs(difference) < .001
+          ? item.target
+          : item.current + difference * (1 - Math.exp(-elapsed / 65));
+        moving ||= Math.abs(item.target - item.current) >= .001;
+        const progress = item.current;
+        item.element.style.transform = item.kind === 'hero'
+          ? `translate3d(0, ${-38 * progress}px, 0)`
+          : item.kind === 'showcase'
+            ? `perspective(1400px) translate3d(0, ${24 * (1 - progress)}px, 0) rotateX(${2 * (1 - progress)}deg) scale(${.98 + .02 * progress})`
+            : `rotate(${-5 + 10 * progress}deg)`;
+      }
+      if (moving) frame = requestAnimationFrame(paint);
+    };
+
+    const schedule = () => {
+      dirty = true;
+      if (!frame && !document.hidden) frame = requestAnimationFrame(paint);
+    };
+    const configure = () => {
+      items.forEach(item => item.element.style.removeProperty('transform'));
+      items = [];
+      if (!reduced && !motionSnapshot() && desktop.matches) {
+        const selectors = [
+          ['.hero-art', 'hero'],
+          ['[data-showcase-frame]', 'showcase'],
+          ['[data-community-orbit]', 'orbit'],
+        ] as const;
+        for (const [selector, kind] of selectors) {
+          document.querySelectorAll<HTMLElement>(selector).forEach(element => {
+            const section = element.closest<HTMLElement>('section');
+            if (section) items.push({ element, section, kind, current: NaN, target: 0 });
+          });
+        }
+      }
+      schedule();
+    };
+    const visibility = () => {
+      cancelAnimationFrame(frame);
+      frame = 0;
+      lastTime = 0;
+      if (!document.hidden) schedule();
+    };
+
+    configure();
+    const resize = 'ResizeObserver' in window ? new ResizeObserver(schedule) : null;
+    resize?.observe(document.body);
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule, { passive: true });
+    desktop.addEventListener('change', configure);
+    document.addEventListener('visibilitychange', visibility);
+    return () => {
+      cancelAnimationFrame(frame);
+      resize?.disconnect();
+      window.removeEventListener('scroll', schedule);
+      window.removeEventListener('resize', schedule);
+      desktop.removeEventListener('change', configure);
+      document.removeEventListener('visibilitychange', visibility);
+      items.forEach(item => item.element.style.removeProperty('transform'));
+    };
+  }, [pathname, reduced]);
+
+  return <div className="scroll-progress" aria-hidden="true"><span ref={bar} /></div>;
+}
+
+export function Magnetic({ children }: { children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const reduced = useMotionPreference();
+
+  useEffect(() => {
+    const element = ref.current;
+    if (!element || reduced || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    let frame = 0;
+    let bounds: DOMRect | null = null;
+    const enter = () => { bounds = element.getBoundingClientRect(); };
+    const move = (event: PointerEvent) => {
+      if (!bounds) return;
+      const x = Math.max(-4, Math.min(4, (event.clientX - bounds.left - bounds.width / 2) * .06));
+      const y = Math.max(-3, Math.min(3, (event.clientY - bounds.top - bounds.height / 2) * .1));
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => { element.style.transform = `translate3d(${x}px,${y}px,0)`; });
+    };
+    const reset = () => {
+      cancelAnimationFrame(frame);
+      bounds = null;
+      element.style.removeProperty('transform');
+    };
+    element.addEventListener('pointerenter', enter);
+    element.addEventListener('pointermove', move);
+    element.addEventListener('pointerleave', reset);
+    element.addEventListener('pointercancel', reset);
+    return () => {
+      reset();
+      element.removeEventListener('pointerenter', enter);
+      element.removeEventListener('pointermove', move);
+      element.removeEventListener('pointerleave', reset);
+      element.removeEventListener('pointercancel', reset);
+    };
+  }, [reduced]);
+
+  return <div ref={ref} className="magnetic">{children}</div>;
+}

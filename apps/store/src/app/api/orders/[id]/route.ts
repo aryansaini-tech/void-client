@@ -1,0 +1,3 @@
+import { getDatabase } from '@void/backend/database';
+import { errorResponse,HttpError,requireSession } from '@void/backend/security';
+export async function GET(request:Request,{params}:{params:Promise<{id:string}>}){try{const session=await requireSession(request);const {id}=await params;const order=await getDatabase().order.findFirst({where:{id,userId:session.user.id},select:{id:true,status:true,fulfillmentStatus:true,subtotal:true,tax:true,total:true,currency:true,createdAt:true,items:{select:{name:true,quantity:true,unitPrice:true}}}});if(!order)throw new HttpError(404,'Order not found.');return Response.json({order},{headers:{'Cache-Control':'no-store'}});}catch(error){return errorResponse(error);}}
