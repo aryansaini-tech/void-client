@@ -20,14 +20,14 @@ test('public content remains readable without JavaScript', async ({ browser }) =
 test('scroll reveals stay visible after scrolling back and respect live reduced motion', async ({ page }) => {
   await page.goto('/');
   const card = page.locator('.feature-card').last();
-  await expect(card).toHaveAttribute('data-motion', 'pending');
+  await expect(card).toHaveCSS('opacity', '1');
   await card.scrollIntoViewIfNeeded();
   await expect(card).toHaveCSS('opacity', '1');
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
   await expect(card).toHaveCSS('opacity', '1');
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await expect(page.locator('html')).toHaveAttribute('data-reduced-motion', 'true');
-  await expect(page.locator('[data-motion="pending"]')).toHaveCount(0);
+  expect(await page.evaluate(() => document.getAnimations().filter(animation => animation.id === 'void-reveal' && animation.playState === 'running').length)).toBe(0);
   await expect(page.locator('.hero-art')).toHaveCSS('transform', 'none');
   await page.reload();
   await expect(page.locator('html')).toHaveCSS('scroll-behavior', 'auto');

@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 
 const websites = {
-  'http://localhost:3000': ['/', '/modules', '/download', '/discord', '/changelog', '/sneak-peeks', '/partners', '/faq', '/about'],
+  'http://localhost:3000': ['/', '/modules', '/download', '/discord', '/changelog', '/sneak-peeks', '/partners', '/faq', '/about', '/store', '/store/products', '/store/categories', '/store/search', '/store/cart', '/store/checkout', '/account/login', '/account/register', '/account/forgot-password', '/account/reset-password', '/account/verify-email'],
   'http://localhost:3001': ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email'],
   'http://localhost:3002': ['/', '/products', '/categories', '/search', '/cart', '/checkout'],
 };
@@ -52,7 +52,7 @@ test('private routes, direct links and unknown products enforce real boundaries'
   assert.ok((await (await fetch('http://localhost:3002/orders')).text()).includes('Sign in to view orders'));
   for (const path of ['/orders/not-real?success=1']) {
     const response = await fetch(`http://localhost:3002${path}`, { redirect: 'manual' });
-    assert.match(await redirectTarget(response), /^http:\/\/localhost:3001\/login\?returnTo=/);
+    assert.match(await redirectTarget(response), /^http:\/\/localhost:3000\/account\/login\?returnTo=/);
   }
   for (const path of ['/products/not-published', '/categories/not-published']) {
     const response = await fetch(`http://localhost:3002${path}`);

@@ -7,8 +7,9 @@ import { loginSchema, registerSchema, emailSchema, passwordSchema } from '@void/
 import { site } from '@void/shared/config';
 import { safeReturnUrl } from '@void/shared/urls';
 import { MicrosoftIcon } from '@void/ui/brand';
-import { authClient } from '@/lib/auth-client';
-import { microsoftErrorMessage } from '@/lib/auth-messages';
+import { useHydrated } from '@void/ui/hydration';
+import { authClient } from '@void/account/lib/auth-client';
+import { microsoftErrorMessage } from '@void/account/lib/auth-messages';
 import styles from './auth-form.module.css';
 
 type Mode = 'login' | 'register' | 'forgot' | 'reset' | 'verify';
@@ -97,11 +98,13 @@ export function AuthForm({ mode, services, returnTo, token, error: initialError 
     : '');
   const [success, setSuccess] = useState('');
 
-  const busy = pending !== null;
+  // Prevent input being lost if a user types before React attaches handlers.
+  const hydrated = useHydrated();
+  const busy = pending !== null || !hydrated;
   const destination = safeReturnUrl(returnTo, site.urls.account, site.urls.store);
-  const authHref = (path: string) => path + '?returnTo=' + encodeURIComponent(destination);
+  const authHref = (path: string) => site.urls.account + path + '?returnTo=' + encodeURIComponent(destination);
   const loginHref = authHref('/login');
-  const loginCallback = site.urls.account + loginHref;
+  const loginCallback = loginHref;
   const needsEmail = mode !== 'reset';
   const needsPassword = mode === 'login' || mode === 'register' || mode === 'reset';
   const available = services.auth && (mode === 'login' || services.email) && (mode !== 'reset' || Boolean(token));
@@ -196,7 +199,7 @@ export function AuthForm({ mode, services, returnTo, token, error: initialError 
       } else if (mode === 'register') {
         result = await authClient.signUp.email({ name: name.trim(), email: normalizedEmail, password, callbackURL: loginCallback });
       } else if (mode === 'forgot') {
-        result = await authClient.requestPasswordReset({ email: normalizedEmail, redirectTo: site.urls.account + authHref('/reset-password') });
+        result = await authClient.requestPasswordReset({ email: normalizedEmail, redirectTo: authHref('/reset-password') });
       } else if (mode === 'reset') {
         result = await authClient.resetPassword({ newPassword: password, token: token! });
       } else {

@@ -1,5 +1,5 @@
 import { serviceState } from '@void/backend/env';
-import { AuthForm } from '@/components/auth-form';
+import { AuthForm } from '@void/account/components/auth-form';
 
 export const metadata = { title: 'Recover your account' };
 export const dynamic = 'force-dynamic';

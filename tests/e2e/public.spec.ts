@@ -6,8 +6,12 @@ async function noOverflow(page: Page) {
 }
 
 test('every public route renders with metadata and no broken local assets', async ({ page }) => {
+  test.setTimeout(120_000);
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
+  page.on('console', message => {
+    if (message.type() === 'error' && /hydration|hydrated|Minified React error/i.test(message.text())) errors.push(message.text());
+  });
   page.on('response', response => {
     if (response.status() >= 400 && /\/_next\/|\/media\/|\/brand\//.test(response.url())) errors.push(`${response.status()} ${response.url()}`);
   });
@@ -20,11 +24,11 @@ test('every public route renders with metadata and no broken local assets', asyn
     await noOverflow(page);
   }
   for (const url of [
-    'http://localhost:3001/login', 'http://localhost:3001/register',
-    'http://localhost:3001/forgot-password', 'http://localhost:3001/reset-password',
-    'http://localhost:3001/verify-email', 'http://localhost:3002/',
-    'http://localhost:3002/products', 'http://localhost:3002/categories',
-    'http://localhost:3002/search', 'http://localhost:3002/cart', 'http://localhost:3002/checkout',
+    'http://localhost:3000/account/login', 'http://localhost:3000/account/register',
+    'http://localhost:3000/account/forgot-password', 'http://localhost:3000/account/reset-password',
+    'http://localhost:3000/account/verify-email', 'http://localhost:3000/store/',
+    'http://localhost:3000/store/products', 'http://localhost:3000/store/categories',
+    'http://localhost:3000/store/search', 'http://localhost:3000/store/cart', 'http://localhost:3000/store/checkout',
   ]) {
     expect((await page.goto(url))?.status()).toBe(200);
     await expect(page.locator('main h1')).toHaveCount(1);
@@ -37,7 +41,7 @@ test('deliberate layouts at all requested widths', async ({ page }, info) => {
   test.skip(info.project.name !== 'chromium-desktop', 'The width matrix runs once; device projects cover engine-specific interactions.');
   for (const width of [320, 375, 390, 430, 768, 1024, 1440, 1920]) {
     await page.setViewportSize({ width, height: 960 });
-    for (const url of ['http://localhost:3000/', 'http://localhost:3000/faq', 'http://localhost:3001/register', 'http://localhost:3002/']) {
+    for (const url of ['http://localhost:3000/', 'http://localhost:3000/faq', 'http://localhost:3000/account/register', 'http://localhost:3000/store/']) {
       await page.goto(url);
       await expect(page.locator('main h1')).toBeVisible();
       await noOverflow(page);
@@ -115,19 +119,19 @@ test('direct routes, refresh, history and reduced motion remain native', async (
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
   expect(await page.evaluate(() => getComputedStyle(document.documentElement).scrollBehavior)).toBe('auto');
-  await expect(page.locator('[data-motion="pending"]')).toHaveCount(0);
+  expect(await page.evaluate(() => document.getAnimations().filter(animation => animation.id === 'void-reveal' && animation.playState === 'running').length)).toBe(0);
 });
 
 test('private routes redirect and an empty store cannot imply payment success', async ({ page }) => {
   for (const path of ['/dashboard', '/profile', '/security', '/settings', '/discord', '/purchases']) {
-    await page.goto(`http://localhost:3001${path}`);
+    await page.goto(`http://localhost:3000/account${path}`);
     await expect(page).toHaveURL(/\/login\?returnTo=/);
   }
-  await page.goto('http://localhost:3002/orders/not-a-real-order?success=1');
-  await expect(page).toHaveURL(/localhost:3001\/login\?returnTo=/);
-  await page.goto('http://localhost:3002/products/not-published');
+  await page.goto('http://localhost:3000/store/orders/not-a-real-order?success=1');
+  await expect(page).toHaveURL(/localhost:3000\/account\/login\?returnTo=/);
+  await page.goto('http://localhost:3000/store/products/not-published');
   await expect(page.getByRole('heading', { name: 'Lost in the void.' })).toBeVisible();
-  await page.goto('http://localhost:3002/cart');
+  await page.goto('http://localhost:3000/store/cart');
   await expect(page.getByText('Your cart is empty.', { exact: false })).toBeVisible();
 });
 
@@ -146,29 +150,29 @@ test('official logo masking, scroll reveals and live reduced motion survive navi
   expect(mask).toContain('/brand/logo.png');
   expect(await sheen.evaluate(element=>getComputedStyle(element,'::before').animationName)).toBe('logo-sweep');
   await page.locator('[data-showcase-section]').scrollIntoViewIfNeeded();
-  await expect(page.locator('[data-showcase-section] h2')).toHaveAttribute('data-motion','visible');
+  await expect(page.locator('[data-showcase-section] h2')).toHaveCSS('opacity', '1');
   await page.locator('.footer-brand').scrollIntoViewIfNeeded();
   await expect(page.locator('.footer-brand .brand-asset')).toHaveAttribute('data-logo-animated','false');
   await expect(page.locator('.scene-brand .brand-asset')).toHaveAttribute('data-logo-active','false');
   await page.emulateMedia({reducedMotion:'reduce'});
   await expect(page.locator('html')).toHaveAttribute('data-reduced-motion','true');
-  await expect(page.locator('[data-motion="pending"]')).toHaveCount(0);
+  expect(await page.evaluate(() => document.getAnimations().filter(animation => animation.id === 'void-reveal' && animation.playState === 'running').length)).toBe(0);
   await expect(sheen).toHaveCSS('display','none');
   await page.goto('/faq');
   await expect(page.locator('main h1')).toBeVisible();
-  await expect(page.locator('[data-motion="pending"]')).toHaveCount(0);
+  expect(await page.evaluate(() => document.getAnimations().filter(animation => animation.id === 'void-reveal' && animation.playState === 'running').length)).toBe(0);
 });
 
 test('Microsoft and email options have honest setup and callback error states', async ({ page }) => {
   for (const path of ['/login','/register']) {
-    await page.goto(`http://localhost:3001${path}`);
+    await page.goto(`http://localhost:3000/account${path}`);
     await expect(page.getByRole('button',{name:'Continue with Microsoft',exact:true})).toBeDisabled();
     await expect(page.getByLabel('Email address',{exact:true})).toBeVisible();
     await expect(page.getByLabel('Password',{exact:true})).toBeVisible();
     await expect(page.locator('#microsoft-hint')).toContainText('not available yet');
   }
-  await page.goto('http://localhost:3001/login?error=account_not_linked');
+  await page.goto('http://localhost:3000/account/login?error=account_not_linked');
   await expect(page.locator('#auth-error')).toContainText('connect Microsoft in Security');
-  await page.goto('http://localhost:3001/login?error=email_not_verified');
+  await page.goto('http://localhost:3000/account/login?error=email_not_verified');
   await expect(page.locator('#auth-error')).toContainText('Verify your email');
 });

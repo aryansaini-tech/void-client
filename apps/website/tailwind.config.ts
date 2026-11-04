@@ -1,4 +1,4 @@
 import type { Config } from 'tailwindcss';
 import shared from '../../packages/config/tailwind';
-export default { presets: [shared], content: ['./src/**/*.{ts,tsx}', '../../packages/ui/src/**/*.{ts,tsx}'] } satisfies Config;
+export default { presets: [shared], content: ['./src/**/*.{ts,tsx}', '../account/src/**/*.{ts,tsx}', '../store/src/**/*.{ts,tsx}', '../../packages/ui/src/**/*.{ts,tsx}'] } satisfies Config;
 

@@ -1,2 +1,3 @@
 import { redirect } from 'next/navigation';
-export default function Page(){redirect('/dashboard');}
+import { accountUrl } from '@void/shared/config';
+export default function Page(){redirect(accountUrl('/dashboard'));}

@@ -1,76 +1,72 @@
-# Actual verification report
+# Verification report: single-origin store and account
 
-Verified on **3 November 2026 (Asia/Kolkata)** in the supplied Windows workspace, using Node.js 24.19.0, npm 12.2.0 and an isolated PostgreSQL 17.11 database. This report includes the official-logo, theme, motion and Microsoft-login upgrade. Results describe executed checks, not a claim of a completed production deployment.
+Verified on **5 November 2026 (Asia/Kolkata)** in the supplied Windows workspace with Node.js 24.19.0, npm 12.2.0, production Next.js servers, and a fresh disposable PostgreSQL database. This replaces the 3 November report; browser execution was available for this round through Playwright. No deployment, DNS change, or production database operation was performed.
 
-## Passed checks
+## Results
 
-| Check | Actual result |
+| Check | Executed result |
 | --- | --- |
-| Dependency installation | Completed; compatible workspace dependencies recorded in `package-lock.json` |
-| Prisma | Client generated; committed initial migration generated and applied to the disposable PostgreSQL database |
-| `npm run build` | Website, account and store production builds passed, including Next.js TypeScript checking; backend compiled successfully |
-| Production startup | All three Next standalone servers started with their static/public assets; compiled `backend/dist/server.mjs` started successfully |
-| `npm run typecheck` | Passed for all applications, backend, shared/UI packages, test files and TypeScript configuration scripts |
-| `npm run lint` | Passed |
-| `npm test` | **21 passed, 0 failed** |
-| `npm run test:integration` | **19 passed, 0 failed, 0 skipped** with a migrated disposable database |
-| Configured HTTP smoke suite | **26 passed, 0 failed, 0 skipped** against the actual production servers |
-| Worker health/readiness | `/health` returned 200; `/ready` returned 200 with the connected database and 503 while unavailable |
-| `npm run check:config` | Ran successfully; reported missing credentials and disabled checkout without printing secrets |
-| Official logo assets | Both original PNGs served byte-for-byte by all three apps, verified by SHA-256; icons and supplied partner image returned 200 |
-| Concept artwork | Updated visual/interface concept SVGs rendered with Sharp and visually inspected; these are asset renders, not browser screenshots |
-| Playwright discovery | **33 test/project combinations discovered in two files** |
+| Production builds | Website, account, store, and backend all passed after the final application fixes |
+| Monorepo typecheck | Passed for all applications and backend |
+| Test TypeScript compilation | `npx tsc --project tsconfig.tests.json --noEmit` passed |
+| Lint | `npm run lint` passed |
+| Unit tests | **23 passed, 0 failed** |
+| PostgreSQL integration | **19 passed, 0 failed** |
+| Production HTTP smoke tests | **37 passed, 0 failed**, including configured authentication and cart flow |
+| Browser coverage | **66 distinct test/project combinations passed across the full run and targeted reruns**; 6 intentional duplicate skips |
+| Final browser rerun | **6 passed, 0 failed**: single-origin navigation and actual reveal/replay checks on all three browser projects |
+| Patch whitespace | `git diff --check` passed |
 
-Node's counts include parent test groups: the database run contains 18 scenario tests plus its parent. The HTTP run includes its route group and subtests. Counts are not an estimate of every individual assertion.
+Node's test counts include parent groups. Browser counts refer to test/project combinations, not individual assertions. The six skips run the viewport matrix, configured account flow, and configured catalog flow only once instead of duplicating them on both mobile projects.
 
-## Executed coverage
+### Browser run history and fixes
 
-Unit checks cover integer-money totals, currency precision, missing/unavailable products, invalid quantities, duplicate/oversized carts, mixed currencies, checkout schemas, profile/registration validation, origin checks, bounded JSON input, redacted errors, authenticated email encryption, safe public/return URLs and local media paths.
+The first full run executed 72 combinations: 59 passed, 7 failed, and 6 intentionally skipped. The failures exposed homepage content hidden behind a streamed root loading boundary without JavaScript, WebKit input entered before hydration, an insufficient timeout for the multi-page public-route matrix, and an animation assertion that could miss a short reveal.
 
-Database integration checks exercise real password hashing, blocked unverified sign-in, verification mail delivered to a **localhost SMTP sink**, verification tokens, HttpOnly sessions, forged-cookie rejection, profile authorization, stale/concurrent cart revisions, generic credential errors, duplicate-account privacy, atomic rate limiting, signed payment event validation, event replay/idempotency, order ownership, monotonic refunds, reset-token replay protection, session revocation and logout.
+The root website loader was removed, interactive fields wait until handlers are attached, the multi-page test has a bounded 120-second timeout, and the animation test records real Web Animations API calls while preserving their behavior. It checks that the reveal finishes and does not replay on a return scroll. Navigation testing waits for fonts and the initialized shell before jumping straight to the footer.
 
-New Microsoft scenarios validate personal-account authorization URLs, requested scopes, PKCE/state, cancellation without a session, forged ID-token rejection, untrusted origins/redirects, invalid callback state, fresh verified linking requirements and unconfigured-provider responses. A synthetic provider account exercises the last-sign-in-method guard and the real recovery flow that adds a hashed email credential. No code is exchanged with Microsoft, and no Microsoft sign-in success is simulated. The first test run exposed a library test-mode origin default; explicit checks were enabled and the final rerun passed.
+A 21-combination targeted rerun passed 17 with 2 intentional skips and 2 intermittent WebKit navigation/animation failures. Both checks then passed twice in a focused WebKit run. After tightening the test synchronization, the final six-combination run passed on desktop Chromium, mobile Chromium, and mobile WebKit. **A fresh full 72-combination run was not performed after those corrections.**
 
-The HTTP suite requests all **20 public application pages**, their metadata and referenced local scripts/styles/images. It checks security headers, main headings, protected-route redirects, unauthorized APIs, unknown products/categories, robots, sitemaps and original concept artwork. It accepts Next's native streamed redirect/not-found responses where applicable; it does not treat a streamed 200 alone as successful private access.
+## Coverage
 
-The configured HTTP scenario uses the actual compiled account and store servers. It registers and verifies a disposable account, signs in, reads all six private portal pages, updates the profile, authenticates the store with the same session, renders real database-backed category/product routes, persists a cart, reads purchase history and proves logout revokes store access. This also verifies that Prisma works inside the standalone deployment output.
+- Single-origin navigation through `/`, `/store`, cart, products, `/account/login`, registration, and home; direct loads, refresh/history, one header/footer/main, and hydration errors.
+- Protected account pages and existing root API paths, trusted origins and return destinations, verified-email requirements, session ownership, and unauthenticated responses.
+- Real disposable-user registration, verification, sign-in, profile/settings changes, private pages, cart persistence, and logout. HTTP checks also cover the original standalone applications on ports 3001 and 3002.
+- Password visibility and recovery, input validation, search/filter controls, accordions, gallery/lightbox controls, mobile menu focus/scroll lock/Escape, theme persistence, and missing-provider states.
+- Widths **320, 375, 390, 430, 768, 1024, 1440, and 1920px**. Mobile logo geometry on the website, store, and account at 320/375/390/430px in Chromium and WebKit verifies proportions, alignment, spacing, overflow, and stable header height during scrolling. Desktop and mobile screenshots were visually inspected.
+- Content readability without JavaScript, reveal completion and no replay, large scroll jumps, unchanged document geometry, resizing, live reduced-motion preferences, and disabled mobile depth effects.
 
-Synthetic products, prices, identities and signed Stripe events exist **only as explicitly labelled test fixtures**. Tests remove their tracked records. No real sale, provider payment, external email or client download occurred. The default catalog and production seed contain no products or purchases.
+Database integration includes real password hashing, verification delivered to a local SMTP sink, HttpOnly sessions, forged-cookie rejection, profile authorization, concurrent cart revisions, rate limits, signed Stripe event fixtures, idempotency, order ownership, refunds, recovery token replay protection, session revocation, and OAuth state/PKCE/origin rejection.
 
-## Browser execution remains blocked
+## Reproduce
 
-The Playwright suite is written and its discovery ran, but **browser tests did not execute successfully in this environment**. The local browser bridge had no available backend, and a fresh desktop/browser inventory reported an unavailable browser host and missing Computer Use native pipe. Earlier Chrome/headless-shell startup failed with Windows `Access is denied (0x5)`. The upgrade's targeted logo/motion test again failed to launch its Playwright worker with `spawn EPERM`. These are not passing UI results; no security settings were changed to bypass the restriction.
-
-Consequently, visual quality, interactive browser behavior, client console errors, animation smoothness/FPS, Lighthouse scores and real device behavior remain unverified. The source and suite include responsive/reduced-motion support, but no claim is made that the 320, 375, 390, 430, 768, 1024, 1440 and 1920 pixel layouts were visually tested. Physical iOS Safari and Android testing is still required.
-
-The pending suite covers page rendering, overflow at the requested widths, mobile menu focus/scroll lock/Escape/outside click, filters/search/accordions, download availability, keyboard showcase tabs, gallery lightbox, history/refresh/direct links, official-logo masking/proportions, offscreen animation pausing, live reduced motion, Microsoft unavailable/callback states, account flows and store/cart interactions. Projects target desktop Chromium, mobile Chromium and mobile WebKit. Some configuration-dependent cases intentionally skip without a test database.
-
-## Reproduce the checks
+On Windows use `npm.cmd` / `npx.cmd` when PowerShell script execution is restricted. Install dependencies and browser binaries as needed, then run:
 
 ```sh
 npm ci
 npm run db:generate
 npm run lint
 npm run typecheck
+npx tsc --project tsconfig.tests.json --noEmit
 npm test
-npm run build
 ```
 
-For database tests, create a **disposable database ending in `_test`**, migrate it using `npm run db:deploy` with `DATABASE_URL` set to that database, then supply its URL as `TEST_DATABASE_URL` to `npm run test:integration`. Port 2526 must be free for the local SMTP sink.
+For local production browser fixtures, set the following **before building**, since public URLs are embedded in client bundles:
 
-With production servers running on ports 3000–3002, `npm run test:http` runs public HTTP checks. The optional configured scenario normally skips. To include it, run account/store with the same disposable `DATABASE_URL`, sufficiently random `BETTER_AUTH_SECRET`, local public origins, `BETTER_AUTH_URL=http://localhost:3001`, `AUTH_COOKIE_DOMAIN=` and `VOID_LOCAL_PREVIEW=true`. Configure local email queuing, keep the mail worker stopped for this scenario, and pass that same environment plus `TEST_DATABASE_URL` and `VOID_HTTP_CONFIGURED=true` to the test process. It reads only its own queued verification message. Never enable this fixture scenario against a real customer database.
-
-On a host that permits browser processes:
-
-```sh
-npx playwright install chromium webkit
-npm run test:e2e
+```powershell
+$env:VOID_LOCAL_PREVIEW='true'
+$env:NEXT_PUBLIC_WEBSITE_URL='http://localhost:3000'
+$env:NEXT_PUBLIC_ACCOUNT_URL='http://localhost:3000/account'
+$env:NEXT_PUBLIC_STORE_URL='http://localhost:3000/store'
+npm.cmd run build
 ```
 
-Set `TEST_DATABASE_URL` for configured browser cases. Playwright starts the built servers itself; leave `VOID_E2E_REUSE_SERVERS` unset unless intentionally testing matching existing servers. The CI workflow includes PostgreSQL, migration, checks, builds and browser execution. That workflow has been prepared, **not run remotely** in this session.
+Create a disposable PostgreSQL database whose name ends in `_test`. Apply the existing migration with `DATABASE_URL` pointing to it, then supply that same URL as `TEST_DATABASE_URL` for `npm run test:integration` and `npm run test:e2e`. The integration suite uses a localhost SMTP sink on port 2526. Playwright configures and starts the built servers with local fixture credentials; leave `VOID_E2E_REUSE_SERVERS` unset unless deliberately reusing servers with matching configuration.
 
-## Environment-specific notes
+For configured HTTP tests, run the production servers on ports 3000–3002 with the same disposable database, auth secret, localhost public URLs, `BETTER_AUTH_URL=http://localhost:3000`, empty `AUTH_COOKIE_DOMAIN`, and local email queuing configured. Keep the mail worker stopped for this scenario. Run `npm run test:http` with that same environment, `TEST_DATABASE_URL`, and `VOID_HTTP_CONFIGURED=true`; it reads only its own queued verification message. Never use customer data for these fixtures.
 
-Windows locked Prisma's native DLL while preview/tool processes held it. Those owned processes were released before client generation; no type checking was disabled. Restarting the interrupted disposable PostgreSQL instance initially failed its checkpoint signal in this restricted environment. A standard single-user checkpoint completed recovery, the database restarted successfully, and the final integration/HTTP reruns passed. No production database was involved.
+## Limits
 
-Additional release work requires the real environment: Docker image builds, hosting and DNS/HTTPS validation, cross-subdomain secure cookies, actual SMTP delivery, Microsoft and Discord OAuth exchanges, Stripe-hosted test checkout/webhook retries, product fulfillment, security review and physical-device/browser QA. None of those is represented as completed here. See [Microsoft configuration](microsoft-login.md) and [the visual upgrade](visual-upgrade.md).
+The browser checks use emulated desktop/mobile layouts, not physical phones. No measured FPS, Lighthouse score, real Microsoft/Discord exchange, Stripe-hosted payment, external email delivery, Docker image build, or production hosting validation is claimed. Provider security paths were tested with local fixtures; live credentials were unavailable. Test identities and products are explicitly synthetic and cleaned up by their tests.
+
+The integrated website now requires a server runtime; static Cloudflare Pages `out` hosting cannot serve the account/store APIs. See [single-origin implementation and future hosting requirements](single-origin.md). No hosting settings, provider registrations, webhook endpoints, DNS, or production deployment were changed.

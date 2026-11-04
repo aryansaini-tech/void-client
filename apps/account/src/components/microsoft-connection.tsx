@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 import { LoaderCircle } from 'lucide-react';
 import { site } from '@void/shared/config';
 import { MicrosoftIcon } from '@void/ui/brand';
-import { authClient } from '@/lib/auth-client';
-import { microsoftErrorMessage } from '@/lib/auth-messages';
+import { authClient } from '@void/account/lib/auth-client';
+import { microsoftErrorMessage } from '@void/account/lib/auth-messages';
 
 export function MicrosoftConnection({enabled,accountId,hasPassword,error:initialError}:{enabled:boolean;accountId:string|null;hasPassword:boolean;error?:string}) {
   const [busy,setBusy]=useState(false);

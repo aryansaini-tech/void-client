@@ -1,5 +1,7 @@
 # Local development
 
+> The default website now includes `/store` and `/account`. See [single-origin routing](single-origin.md) for current URLs, server requirements and migration notes. Standalone app instructions below remain available for separate hosting.
+
 ## Requirements
 
 - Node.js 22.15+ or 24 LTS and npm; versions are locked in `package-lock.json`.

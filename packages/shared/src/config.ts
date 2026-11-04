@@ -2,11 +2,8 @@ import { publicUrl } from './urls';
 
 const isProduction = process.env.NODE_ENV === 'production' && process.env.VOID_LOCAL_PREVIEW !== 'true';
 
-const defaultUrls = {
-  website: isProduction ? 'https://voidclient.org' : 'http://localhost:3000',
-  account: isProduction ? 'https://account.voidclient.org' : 'http://localhost:3001',
-  store: isProduction ? 'https://store.voidclient.org' : 'http://localhost:3002',
-};
+const websiteUrl = publicUrl(process.env.NEXT_PUBLIC_WEBSITE_URL, isProduction ? 'https://voidclient.org' : 'http://localhost:3000');
+const defaultUrls = { website: websiteUrl, account: `${websiteUrl}/account`, store: `${websiteUrl}/store` };
 
 export const site = {
   name: 'VOID CLIENT',
@@ -40,6 +37,9 @@ export const site = {
 } as const;
 
 export type AppName = keyof typeof site.urls;
+/** Public app URLs also support separately hosted account/store builds. */
+export const accountUrl = (path = '') => `${site.urls.account}${path === '/' ? '' : path}`;
+export const storeUrl = (path = '') => `${site.urls.store}${path === '/' ? '' : path}`;
 export const websiteNavigation = [
   { label: 'Home', href: '/' }, { label: 'Modules', href: '/modules' },
   { label: 'Download', href: '/download' }, { label: 'Store', href: site.urls.store, externalApp: true },

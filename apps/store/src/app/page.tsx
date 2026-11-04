@@ -2,8 +2,8 @@ import { ArrowUpRight, LockKeyhole, Package, UserRound } from 'lucide-react';
 import { site } from '@void/shared/config';
 import { Badge, ButtonLink, SectionHeading } from '@void/ui/components';
 import { VoidScene } from '@void/ui/scene';
-import { ProductGrid } from '@/components/products';
-import { getCatalog } from '@/lib/data';
+import { ProductGrid } from '@void/store/components/products';
+import { getCatalog } from '@void/store/lib/data';
 
 export const metadata = {
   title: { absolute: 'The official store — Void Client' },

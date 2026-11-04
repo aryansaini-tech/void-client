@@ -5,12 +5,15 @@ import Image from 'next/image';
 import { Check, Copy, Search, X, ZoomIn } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useMotionPreference } from './motion';
+import { useHydrated } from './hydration';
 
 export function SearchField({ value, onChange, placeholder = 'Search', label = 'Search' }: { value: string; onChange: (value: string) => void; placeholder?: string; label?: string }) {
-  return <div className="search-field"><Search size={18} aria-hidden="true"/><input type="search" aria-label={label} placeholder={placeholder} value={value} onChange={event => onChange(event.target.value)} maxLength={120} suppressHydrationWarning/>{value && <button type="button" className="icon-button" aria-label={`Clear ${label.toLowerCase()}`} onClick={() => onChange('')}><X size={15}/></button>}</div>;
+  const hydrated = useHydrated();
+  return <div className="search-field"><Search size={18} aria-hidden="true"/><input type="search" aria-label={label} placeholder={placeholder} value={value} disabled={!hydrated} onChange={event => onChange(event.target.value)} maxLength={120}/>{value && <button type="button" className="icon-button" aria-label={`Clear ${label.toLowerCase()}`} onClick={() => onChange('')}><X size={15}/></button>}</div>;
 }
 export function FilterBar({ options, value, onChange, label = 'Filter' }: { options: readonly string[]; value: string; onChange: (value: string) => void; label?: string }) {
-  return <div className="filter-bar" role="group" aria-label={label}>{options.map(option => <button key={option} type="button" aria-pressed={option === value} onClick={() => onChange(option)} className={value === option ? 'selected' : ''}>{option}</button>)}</div>;
+  const hydrated = useHydrated();
+  return <div className="filter-bar" role="group" aria-label={label}>{options.map(option => <button key={option} type="button" disabled={!hydrated} aria-pressed={option === value} onClick={() => onChange(option)} className={value === option ? 'selected' : ''}>{option}</button>)}</div>;
 }
 export function CopyButton({ value, label = 'Copy server address' }: { value: string; label?: string }) {
   const [status, setStatus] = useState('');

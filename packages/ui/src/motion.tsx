@@ -59,24 +59,41 @@ export function MotionRoot({ children }: { children: ReactNode }) {
   useEffect(() => {
     const currentPreference = motionSnapshot();
     document.documentElement.dataset.reducedMotion = String(currentPreference);
-    const content = document.querySelector('main');
-    if (currentPreference || !content || !('IntersectionObserver' in window)) return;
+    if (currentPreference || !('IntersectionObserver' in window)) return;
 
     const elements = new Set<HTMLElement>();
+    const animations = new Map<HTMLElement, Animation>();
     let frame = 0;
     const observer = new IntersectionObserver(entries => {
       for (const entry of entries) {
         if (!entry.isIntersecting) continue;
-        (entry.target as HTMLElement).dataset.motion = 'visible';
         observer.unobserve(entry.target);
+        const element = entry.target as HTMLElement;
+        // A large scroll jump should show its destination immediately.
+        if (entry.boundingClientRect.top < window.innerHeight * .2 || element.contains(document.activeElement)) continue;
+        const mobile = window.matchMedia('(max-width: 767px)').matches;
+        const direction = element.dataset.reveal;
+        const from = mobile ? '0 12px' : direction === 'left' ? '-16px 0' : direction === 'right' ? '16px 0' : direction === 'heading' ? '0 10px' : '0 18px';
+        // WAAPI doesn't mutate React-owned attributes during streamed hydration.
+        const animation = element.animate([{ opacity: 0, translate: from }, { opacity: 1, translate: '0 0' }], {
+          duration: mobile ? 320 : 480,
+          easing: 'cubic-bezier(.22, 1, .36, 1)',
+        });
+        animation.id = 'void-reveal';
+        animations.set(element, animation);
+        animation.onfinish = () => { animations.delete(element); };
       }
-    }, { threshold: 0, rootMargin: '0px 0px -24px 0px' });
+    }, { threshold: 0, rootMargin: '0px 0px 64px 0px' });
 
     const scan = () => {
       frame = 0;
+      const content = document.querySelector('main');
+      if (!content) return;
       for (const element of elements) {
         if (!element.isConnected) {
           observer.unobserve(element);
+          animations.get(element)?.cancel();
+          animations.delete(element);
           elements.delete(element);
         }
       }
@@ -95,10 +112,7 @@ export function MotionRoot({ children }: { children: ReactNode }) {
       for (const { element, bounds } of measurements) {
         if (bounds.height === 0) continue;
         elements.add(element);
-        if (bounds.top < window.innerHeight - 24 || element.contains(document.activeElement)) {
-          element.dataset.motion = 'settled';
-        } else {
-          element.dataset.motion = 'pending';
+        if (bounds.top >= window.innerHeight + 64 && !element.contains(document.activeElement)) {
           observer.observe(element);
         }
       }
@@ -111,23 +125,24 @@ export function MotionRoot({ children }: { children: ReactNode }) {
     });
     const focus = (event: FocusEvent) => {
       if (!(event.target instanceof Element)) return;
-      let element = event.target.closest<HTMLElement>('[data-motion]');
-      while (element) {
-        element.dataset.motion = 'settled';
+      for (const element of elements) {
+        if (!element.contains(event.target)) continue;
+        animations.get(element)?.cancel();
+        animations.delete(element);
         observer.unobserve(element);
-        element = element.parentElement?.closest<HTMLElement>('[data-motion]') ?? null;
       }
     };
 
     frame = requestAnimationFrame(scan);
-    updates.observe(content, { childList: true, subtree: true });
+    // App Router can replace <main> after this effect starts during a transition.
+    updates.observe(document.body, { childList: true, subtree: true });
     document.addEventListener('focusin', focus);
     return () => {
       cancelAnimationFrame(frame);
       updates.disconnect();
       observer.disconnect();
       document.removeEventListener('focusin', focus);
-      elements.forEach(element => { delete element.dataset.motion; });
+      animations.forEach(animation => animation.cancel());
     };
   }, [pathname, reduced]);
 
@@ -184,6 +199,9 @@ type DepthItem = {
   kind: 'hero' | 'showcase' | 'orbit';
   current: number;
   target: number;
+  top: number;
+  height: number;
+  painted: number;
 };
 
 const clamp = (value: number) => Math.max(0, Math.min(1, value));
@@ -199,6 +217,9 @@ function ScrollEffects() {
     let items: DepthItem[] = [];
     let frame = 0;
     let dirty = true;
+    let layoutDirty = true;
+    let viewport = 0;
+    let distance = 0;
     let lastTime = 0;
 
     const paint = (time: number) => {
@@ -208,17 +229,26 @@ function ScrollEffects() {
       lastTime = time;
 
       if (dirty) {
-        const viewport = window.innerHeight;
-        const distance = document.documentElement.scrollHeight - viewport;
-        const progress = distance > 0 ? clamp(window.scrollY / distance) : 0;
-        const measurements = items.map(item => ({ item, bounds: item.section.getBoundingClientRect() }));
-
-        for (const { item, bounds } of measurements) {
+        const scroll = window.scrollY;
+        // Layout is measured only after a resize/content change, never per scroll.
+        if (layoutDirty) {
+          viewport = window.innerHeight;
+          distance = document.documentElement.scrollHeight - viewport;
+          for (const item of items) {
+            const bounds = item.section.getBoundingClientRect();
+            item.top = bounds.top + scroll;
+            item.height = bounds.height;
+          }
+          layoutDirty = false;
+        }
+        const progress = distance > 0 ? clamp(scroll / distance) : 0;
+        for (const item of items) {
+          const top = item.top - scroll;
           item.target = item.kind === 'hero'
-            ? clamp(-bounds.top / Math.max(1, bounds.height))
+            ? clamp(-top / Math.max(1, item.height))
             : item.kind === 'showcase'
-              ? clamp((viewport * .92 - bounds.top) / (viewport * .62))
-              : clamp((viewport - bounds.top) / (viewport + bounds.height));
+              ? clamp((viewport * .92 - top) / (viewport * .62))
+              : clamp((viewport - top) / (viewport + item.height));
           if (!Number.isFinite(item.current)) item.current = item.target;
         }
         if (bar.current) bar.current.style.transform = `scaleX(${progress})`;
@@ -230,9 +260,11 @@ function ScrollEffects() {
         const difference = item.target - item.current;
         item.current = Math.abs(difference) < .001
           ? item.target
-          : item.current + difference * (1 - Math.exp(-elapsed / 65));
+          : item.current + difference * (1 - Math.exp(-elapsed / 45));
         moving ||= Math.abs(item.target - item.current) >= .001;
         const progress = item.current;
+        if (progress === item.painted) continue;
+        item.painted = progress;
         item.element.style.transform = item.kind === 'hero'
           ? `translate3d(0, ${-38 * progress}px, 0)`
           : item.kind === 'showcase'
@@ -246,6 +278,7 @@ function ScrollEffects() {
       dirty = true;
       if (!frame && !document.hidden) frame = requestAnimationFrame(paint);
     };
+    const measure = () => { layoutDirty = true; schedule(); };
     const configure = () => {
       items.forEach(item => item.element.style.removeProperty('transform'));
       items = [];
@@ -258,11 +291,11 @@ function ScrollEffects() {
         for (const [selector, kind] of selectors) {
           document.querySelectorAll<HTMLElement>(selector).forEach(element => {
             const section = element.closest<HTMLElement>('section');
-            if (section) items.push({ element, section, kind, current: NaN, target: 0 });
+            if (section) items.push({ element, section, kind, current: NaN, target: 0, top: 0, height: 0, painted: NaN });
           });
         }
       }
-      schedule();
+      measure();
     };
     const visibility = () => {
       cancelAnimationFrame(frame);
@@ -272,17 +305,23 @@ function ScrollEffects() {
     };
 
     configure();
-    const resize = 'ResizeObserver' in window ? new ResizeObserver(schedule) : null;
+    const resize = 'ResizeObserver' in window ? new ResizeObserver(measure) : null;
     resize?.observe(document.body);
+    items.forEach(item => resize?.observe(item.section));
+    const contentChanges = new MutationObserver(records => {
+      if (records.some(record => record.addedNodes.length || record.removedNodes.length)) configure();
+    });
+    contentChanges.observe(document.body, { childList: true, subtree: true });
     window.addEventListener('scroll', schedule, { passive: true });
-    window.addEventListener('resize', schedule, { passive: true });
+    window.addEventListener('resize', measure, { passive: true });
     desktop.addEventListener('change', configure);
     document.addEventListener('visibilitychange', visibility);
     return () => {
       cancelAnimationFrame(frame);
       resize?.disconnect();
+      contentChanges.disconnect();
       window.removeEventListener('scroll', schedule);
-      window.removeEventListener('resize', schedule);
+      window.removeEventListener('resize', measure);
       desktop.removeEventListener('change', configure);
       document.removeEventListener('visibilitychange', visibility);
       items.forEach(item => item.element.style.removeProperty('transform'));

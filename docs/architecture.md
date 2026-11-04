@@ -1,5 +1,7 @@
 # Architecture
 
+> The default website now includes `/store` and `/account`. See [single-origin routing](single-origin.md) for current URLs, server requirements and migration notes. Standalone app instructions below remain available for separate hosting.
+
 The applications are independent npm workspaces, each with its own Next.js App Router, build output, routes, metadata and runtime port. They share source packages through workspace imports; Next transpiles those packages. No subdomain routing trick or WordPress installation is involved.
 
 ## Request boundaries

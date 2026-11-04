@@ -2,7 +2,7 @@
 
 **PLAY BEYOND LIMITS.**
 
-An original black-and-gold Minecraft Bedrock ecosystem: an editorial product website, a secure account portal, and a store with server-priced Stripe Checkout. All three applications are independent Next.js deployments sharing a design system and typed services.
+An original black-and-gold Minecraft Bedrock ecosystem: an editorial product website, a secure account portal, and a store with server-priced Stripe Checkout. The website serves `/store` and `/account` by importing the existing app routes and services. The standalone account and store builds remain available.
 
 The repository root is the `void-client` monorepo. It was created from an empty workspace. No Flarial code, templates, WordPress themes, or third-party component source was copied.
 
@@ -23,11 +23,13 @@ No credentials are required to preview all public pages. Account operations and 
 | Application | Local address | Production domain |
 | --- | --- | --- |
 | Website | http://localhost:3000 | https://voidclient.org |
-| Account | http://localhost:3001 | https://account.voidclient.org |
-| Store | http://localhost:3002 | https://store.voidclient.org |
+| Account | http://localhost:3000/account | https://voidclient.org/account |
+| Store | http://localhost:3000/store | https://voidclient.org/store |
 | Backend / mail worker | http://localhost:3003/health | Private service; no public domain required |
 
 For authentication, start PostgreSQL and a local inbox with `docker compose up -d`, set the values described in [local development](docs/development.md), then run `npm run db:deploy`. The backend worker delivers verification and recovery messages. Checkout additionally requires genuine products, approved policy URLs, and Stripe credentials.
+
+`npm run dev:website` previews all three areas. Ports 3001 and 3002 still run the standalone account/store applications with their original root routes. The integrated website requires a Next.js server; static export cannot run authentication or checkout. See [single-origin routing and migration notes](docs/single-origin.md) before changing any hosting configuration.
 
 ## Repository
 
@@ -54,7 +56,7 @@ docs/                      Architecture, setup, content, security, deployment, Q
 - **Website:** Home, Modules, Download, Discord, Changelog, Sneak Peeks, Partners, FAQ, About; searchable libraries, accessible filters/accordions, gallery lightbox, showcase tabs, partner-address copy controls, mobile navigation, metadata, Open Graph images, robots and sitemap.
 - **Account:** Login, registration, forgot/reset password, email verification, dashboard, profile, security, settings, Discord linking, purchase history, and opt-in public profiles. Password hashing, email verification, persistent sessions, rate limits, session revocation and reset flows use Better Auth and PostgreSQL.
 - **Store:** Homepage, collection, categories, category/product detail routes, search, persistent guest and account carts, checkout, order confirmation/status and purchase history. Account carts use revision checks; stale updates are rejected. Stripe receives product Price IDs from the server. Signed webhooks record payments transactionally and deduplicate events.
-- **Motion:** Coordinated scroll reveals, preview crossfades, gold shine, restrained magnetic controls, lightweight scroll-linked artwork, and route transitions. Scrolling stays native; content remains readable with reduced motion or JavaScript disabled. See [the UI repair notes](docs/ui-polish.md).
+- **Motion:** Browser-native reveals, preview crossfades, gold shine, restrained magnetic controls, lightweight scroll-linked artwork, and route transitions. Scrolling stays native; content remains readable with reduced motion or JavaScript disabled. See [the UI repair notes](docs/ui-polish.md) and [the integration notes](docs/single-origin.md).
 
 Technology: Next.js 16.4.4, React 19.3.1, TypeScript, Tailwind, Framer Motion, GSAP, Lucide, Prisma 6.19.3, PostgreSQL, Better Auth 1.7.15, Hono, Nodemailer and Stripe. Manrope is self-hosted; no runtime font CDN is needed. See [architecture](docs/architecture.md).
 

@@ -4,8 +4,7 @@ import { Navigation } from '@void/ui/navigation';
 import { Footer } from '@void/ui/footer';
 import { MotionRoot } from '@void/ui/motion';
 import { AppearanceScript } from '@void/ui/appearance';
-import { CartProvider } from '@/components/cart-provider';
-import { getCatalog, getViewer } from '@/lib/data';
+import { StoreProvider } from '../components/store-provider';
 import './globals.css';
 import '@void/design-system/styles.css';
 import '@void/design-system/polish.css';
@@ -22,17 +21,16 @@ export const viewport: Viewport = { themeColor: '#E5ECF6', width: 'device-width'
 export const dynamic = 'force-dynamic';
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
-  const [catalog, viewer] = await Promise.all([getCatalog(), getViewer()]);
   return (
     <html lang="en" data-theme="light" suppressHydrationWarning>
-      <head><AppearanceScript /></head>
+      <head><link rel="preload" href="/fonts/Monocraft.otf" as="font" type="font/otf" crossOrigin="anonymous" /><AppearanceScript /></head>
       <body>
         <MotionRoot>
-          <CartProvider catalog={catalog.products} userId={viewer?.user.id ?? null}>
+          <StoreProvider>
             <Navigation app="store" />
             {children}
             <Footer app="store" />
-          </CartProvider>
+          </StoreProvider>
         </MotionRoot>
       </body>
     </html>

@@ -11,6 +11,7 @@
     "./motion": "./src/motion.tsx",
     "./footer": "./src/footer.tsx",
     "./interactive": "./src/interactive.tsx",
+    "./hydration": "./src/hydration.ts",
     "./scene": "./src/scene.tsx",
     "./brand-image-data": "./src/brand-image-data.ts"
   },

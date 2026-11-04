@@ -13,9 +13,20 @@ export function safeReturnUrl(value: string | null | undefined, accountUrl: stri
   const fallback = `${accountUrl}/dashboard`;
   if (!value || value.includes('\\') || /[\u0000-\u001f]/.test(value)) return fallback;
   try {
-    const target = new URL(value, accountUrl);
-    if (![new URL(accountUrl).origin, new URL(storeUrl).origin].includes(target.origin)) return fallback;
-    if (!['/dashboard', '/checkout', '/orders', '/profile', '/security', '/settings', '/purchases', '/discord'].some(path => target.pathname === path || target.pathname.startsWith(`${path}/`))) return fallback;
+    const account = new URL(accountUrl);
+    const store = new URL(storeUrl);
+    // Existing relative account destinations remain valid when mounted at /account.
+    const accountRoutes = ['/dashboard', '/profile', '/security', '/settings', '/purchases', '/discord'];
+    const storeRoutes = ['/checkout', '/orders'];
+    const accountBase = account.pathname.replace(/\/$/, '');
+    const relativeAccountRoute = value.startsWith('/') && accountRoutes.some(path => value === path || value.startsWith(`${path}?`) || value.startsWith(`${path}/`) || value.startsWith(`${path}#`));
+    const target = new URL(relativeAccountRoute ? `${accountBase}${value}` : value, `${accountUrl}/`);
+    if (target.username || target.password) return fallback;
+    const allowed = [[account, accountRoutes], [store, storeRoutes]] as const;
+    if (!allowed.some(([base, routes]) => target.origin === base.origin && routes.some(route => {
+      const path = `${base.pathname.replace(/\/$/, '')}${route}`;
+      return target.pathname === path || target.pathname.startsWith(`${path}/`);
+    }))) return fallback;
     return target.href;
   } catch { return fallback; }
 }

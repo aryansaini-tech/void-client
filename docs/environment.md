@@ -1,5 +1,7 @@
 # Environment reference
 
+> The default website now includes `/store` and `/account`. See [single-origin routing](single-origin.md) for current URLs, server requirements and migration notes. Standalone app instructions below remain available for separate hosting.
+
 Start from `.env.example`. It contains no real credentials. The root runner and application configuration load root `.env` for local development. Hosted applications receive environment variables through the hosting platform. Never commit `.env`, test sessions, database dumps or secret values.
 
 ## Public build-time values

@@ -19,8 +19,8 @@ test('compiled account and store complete a real authenticated HTTP round trip',
   const email = `http-${randomUUID()}@example.test`;
   const password = `TEST-only-${randomUUID()}`;
   const started = new Date();
-  const account = 'http://localhost:3001';
-  const store = 'http://localhost:3002';
+  const account = 'http://localhost:3000';
+  const store = 'http://localhost:3000';
   let userId = '';
   let categoryId = '';
   let productId = '';
@@ -35,7 +35,7 @@ test('compiled account and store complete a real authenticated HTTP round trip',
   }
   try {
     const registration = await request(account, '/api/auth/sign-up/email', {
-      name: 'TEST HTTP PLAYER', email, password, callbackURL: account + '/login',
+      name: 'TEST HTTP PLAYER', email, password, callbackURL: account + '/account/login',
     });
     assert.equal(registration.status, 200);
     const user = await db.user.findUniqueOrThrow({ where: { email } });
@@ -50,7 +50,7 @@ test('compiled account and store complete a real authenticated HTTP round trip',
         const mail = decryptEmail(job.payload);
         if (mail.to !== email) continue;
         mailIds.add(job.id);
-        verification ??= mail.text.match(/http:\/\/localhost:3001\/api\/auth\/verify-email[^\s]+/)?.[0];
+        verification ??= mail.text.match(/http:\/\/localhost:3000\/api\/auth\/verify-email[^\s]+/)?.[0];
       } catch { /* Ignore messages from other isolated test runs. */ }
     }
     assert.ok(verification);
@@ -63,7 +63,7 @@ test('compiled account and store complete a real authenticated HTTP round trip',
     cookie = cookies.map(value => value.split(';')[0]).join('; ');
 
     for (const path of ['/dashboard', '/profile', '/settings', '/security', '/discord', '/purchases']) {
-      const response = await fetch(account + path, { headers: { cookie }, redirect: 'manual' });
+      const response = await fetch(account + '/account' + path, { headers: { cookie }, redirect: 'manual' });
       assert.equal(response.status, 200);
       const html = await response.text();
       assert.doesNotMatch(html, /__next-page-redirect|Application error/);
@@ -86,7 +86,7 @@ test('compiled account and store complete a real authenticated HTTP round trip',
     } });
     productId = product.id;
     for (const path of [`/products/${slug}`, `/categories/${slug}`]) {
-      const response = await fetch(store + path);
+      const response = await fetch(store + '/store' + path);
       assert.equal(response.status, 200);
       assert.ok((await response.text()).includes(product.name));
     }
@@ -95,7 +95,7 @@ test('compiled account and store complete a real authenticated HTTP round trip',
     }, 'PUT');
     assert.equal(saved.status, 200);
     assert.equal((await db.cartItem.findFirstOrThrow({ where: { productId } })).quantity, 2);
-    const history = await fetch(store + '/orders', { headers: { cookie } });
+    const history = await fetch(store + '/store/orders', { headers: { cookie } });
     assert.equal(history.status, 200);
     assert.doesNotMatch(await history.text(), /Sign in to view orders|Application error/);
     assert.equal((await request(account, '/api/auth/sign-out', {})).status, 200);

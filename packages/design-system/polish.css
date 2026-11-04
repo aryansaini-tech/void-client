@@ -37,9 +37,9 @@ button, input, select, textarea { accent-color: var(--accent); }
 .notice svg { color: var(--accent); flex-shrink: 0; }
 
 /* Original logo assets, with Monocraft reserved for the wordmark. */
-.wordmark { gap: 11px; line-height: 1; user-select: none; }
-.wordmark-icon.brand-asset-mark { width: 38px; height: auto; }
-.wordmark-text { gap: 4px; }
+.wordmark { --wordmark-size: 38px; gap: 10px; line-height: 1; user-select: none; flex: none; }
+.wordmark-icon.brand-asset-mark { width: var(--wordmark-size); height: var(--wordmark-size); }
+.wordmark-text { gap: 4px; width: 4.25ch; font-family: var(--font-monocraft), monospace; font-size: 21px; }
 .wordmark-title { font-size: 21px; font-weight: 400; letter-spacing: .055em; }
 .wordmark-client { font-size: 9px; font-weight: 400; letter-spacing: .24em; color: var(--accent); }
 .brand-asset {
@@ -97,13 +97,13 @@ html[data-page-hidden="true"] .logo-sheen-sync::before { animation: none; }
   border-color: var(--border);
   box-shadow: var(--shadow-sm);
 }
-.nav-inner { min-height: var(--header-height); gap: 26px; }
-.brand-link { display: inline-flex; align-items: center; }
+.nav-inner { height: var(--header-height); min-height: var(--header-height); gap: 26px; }
+.brand-link { display: inline-flex; align-items: center; min-height: 44px; }
 .desktop-nav { gap: clamp(14px, 1.6vw, 25px); }
 .nav-link { font-size: 12px; padding-block: 18px; }
 .nav-link:hover, .nav-link.active { color: var(--text); }
 .nav-indicator { bottom: 9px; height: 2px; background: var(--accent); border-radius: 2px; }
-.nav-actions { gap: 8px; }
+.nav-actions { gap: 8px; flex: none; margin-left: auto; }
 .account-link {
   min-height: 44px;
   padding: 10px 13px;
@@ -449,31 +449,12 @@ html[data-page-hidden="true"] .scene-float { animation-play-state: paused; }
 .footer-bottom { border-color: var(--border); font-size: 10px; flex-wrap: wrap; }
 .footer-giant { color: rgb(var(--text-rgb) / .065); }
 
-/* Progressive enhancement: only JS-prepared, offscreen elements are hidden.
-   Translate is independent of transforms used by hover and scroll depth. */
-[data-motion="pending"] { opacity: 0; translate: 0 26px; }
-[data-motion="pending"][data-reveal="left"] { translate: -24px 0; }
-[data-motion="pending"][data-reveal="right"] { translate: 24px 0; }
-[data-motion="pending"][data-reveal="heading"] { translate: 0 16px; }
-[data-motion="visible"] {
-  opacity: 1;
-  translate: 0 0;
-  transition: opacity 560ms var(--ease-out), translate 720ms var(--ease-out), border-color 220ms, box-shadow 220ms, background 220ms, transform 220ms var(--ease-out);
-  transition-delay: var(--reveal-delay, 0ms), var(--reveal-delay, 0ms), 0ms, 0ms, 0ms, 0ms;
-}
-[data-motion="settled"] { opacity: 1; translate: none; }
+/* Reveals use WAAPI: server-rendered content is always visible by default. */
 .reveal-words { display: inline; }
 .reveal-word { display: inline-block; overflow: clip; vertical-align: top; padding-bottom: .16em; margin-bottom: -.16em; white-space: pre; }
 .reveal-word > span { display: inline-block; }
-[data-motion="pending"] .reveal-word > span { translate: 0 110%; }
-[data-motion="visible"] .reveal-word > span { animation: word-arrive 680ms var(--ease-out) both; animation-delay: calc(var(--reveal-delay, 0ms) + var(--word-delay, 0ms)); }
-@keyframes word-arrive { from { translate: 0 110%; } to { translate: 0 0; } }
 .page-transition { animation: page-arrive 260ms ease-out; }
 @keyframes page-arrive { from { opacity: .6; } to { opacity: 1; } }
-@media (min-width: 768px) {
-  .feature-grid > :nth-child(2), .module-grid > :nth-child(3n + 2), .benefit-grid > :nth-child(3n + 2), .steps-grid > :nth-child(2) { --reveal-delay: 70ms; }
-  .feature-grid > :nth-child(3), .module-grid > :nth-child(3n + 3), .benefit-grid > :nth-child(3n + 3), .steps-grid > :nth-child(3) { --reveal-delay: 140ms; }
-}
 @media (hover: hover) and (pointer: fine) {
   .feature-card:hover, .product-card:hover, .partner-card:hover {
     border-color: var(--border-gold);
@@ -529,7 +510,8 @@ html[data-page-hidden="true"] .scene-float { animation-play-state: paused; }
 @media (max-width: 767px) {
   :root { --gutter: 24px; }
   .nav-inner { min-height: var(--header-height); gap: 14px; padding-inline: 24px; }
-  .wordmark-icon.brand-asset-mark { width: 34px; }
+  .wordmark { --wordmark-size: 36px; }
+  .wordmark-text { font-size: 19px; }
   .wordmark-title { font-size: 19px; }
   .wordmark-client { font-size: 8px; }
   .nav-actions { gap: 6px; }
@@ -604,16 +586,13 @@ html[data-page-hidden="true"] .scene-float { animation-play-state: paused; }
   .footer-group > a { font-size: 11px; min-height: 30px; }
   .footer-bottom { font-size: 10px; }
   .footer-giant { font-size: 10vw; }
-  [data-motion="pending"] { translate: 0 18px; }
-  [data-motion="visible"] { --reveal-delay: 0ms; }
 }
 @media (max-width: 479px) {
   :root { --gutter: 20px; }
   .nav-inner { padding-inline: 20px; gap: 8px; }
-  .wordmark { gap: 8px; }
-  .wordmark-icon.brand-asset-mark { width: 31px; }
-  .wordmark-title { font-size: 17px; }
-  .wordmark-client { font-size: 7.5px; }
+  .wordmark { --wordmark-size: 36px; gap: 8px; }
+  .wordmark-title { font-size: 19px; }
+  .wordmark-client { font-size: 8px; }
   .nav-actions { gap: 3px; }
   .hero { padding-top: calc(var(--header-height) + 34px); }
   .hero-art { aspect-ratio: 1.45; margin-top: 12px; }
@@ -640,9 +619,6 @@ html[data-page-hidden="true"] .scene-float { animation-play-state: paused; }
 }
 @media (max-width: 359px) {
   .nav-inner { padding-inline: 16px; }
-  .wordmark-icon.brand-asset-mark { width: 28px; }
-  .wordmark-title { font-size: 16px; }
-  .wordmark-client { font-size: 7px; }
   .site-header[data-app="store"] .account-link { display: none; }
   .hero .button-row { flex-direction: column; align-items: stretch; }
   .hero .button-row > *, .hero .magnetic > .button { width: 100%; }

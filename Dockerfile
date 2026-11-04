@@ -14,8 +14,8 @@ RUN npm ci
 COPY . .
 ARG APP=website
 ARG NEXT_PUBLIC_WEBSITE_URL=https://voidclient.org
-ARG NEXT_PUBLIC_ACCOUNT_URL=https://account.voidclient.org
-ARG NEXT_PUBLIC_STORE_URL=https://store.voidclient.org
+ARG NEXT_PUBLIC_ACCOUNT_URL=https://voidclient.org/account
+ARG NEXT_PUBLIC_STORE_URL=https://voidclient.org/store
 ARG NEXT_PUBLIC_DISCORD_INVITE
 ARG NEXT_PUBLIC_PRIVACY_URL
 ARG NEXT_PUBLIC_TERMS_URL

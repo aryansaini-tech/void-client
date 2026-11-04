@@ -8,7 +8,7 @@ const databaseUrl=process.env.TEST_DATABASE_URL;
 test('PostgreSQL authentication, authorization and payment integration', {skip:!databaseUrl,timeout:120000},async t=>{
   assert.ok(databaseUrl);assert.match(new URL(databaseUrl).pathname,/_test$/,'Integration tests require a dedicated database ending in _test.');
   process.env.DATABASE_URL=databaseUrl;process.env.NODE_ENV='test';process.env.BETTER_AUTH_SECRET=`TEST-ONLY-${randomUUID()}-${randomUUID()}`;
-  process.env.BETTER_AUTH_URL='http://localhost:3001';process.env.AUTH_COOKIE_DOMAIN='';process.env.SMTP_HOST='127.0.0.1';process.env.SMTP_PORT='2526';process.env.SMTP_SECURE='false';process.env.EMAIL_FROM='Void Test <noreply@example.test>';
+  process.env.NEXT_PUBLIC_WEBSITE_URL='http://localhost:3000';process.env.NEXT_PUBLIC_ACCOUNT_URL='http://localhost:3001';process.env.NEXT_PUBLIC_STORE_URL='http://localhost:3002';process.env.BETTER_AUTH_URL='http://localhost:3001';process.env.AUTH_COOKIE_DOMAIN='';process.env.SMTP_HOST='127.0.0.1';process.env.SMTP_PORT='2526';process.env.SMTP_SECURE='false';process.env.EMAIL_FROM='Void Test <noreply@example.test>';
   // Authorization-URL and rejection checks only: these are not real credentials
   // and the suite never exchanges a code or calls Microsoft's servers.
   process.env.MICROSOFT_CLIENT_ID='00000000-1111-4222-8333-000000000000';

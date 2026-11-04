@@ -1,9 +1,9 @@
 import { getDatabase } from '@void/backend/database';
 import { serviceState } from '@void/backend/env';
 import { Badge } from '@void/ui/components';
-import { requireViewer } from '@/lib/viewer';
-import { PasswordForm, PasswordSetup, SessionList } from '@/components/security-forms';
-import { MicrosoftConnection } from '@/components/microsoft-connection';
+import { requireViewer } from '@void/account/lib/viewer';
+import { PasswordForm, PasswordSetup, SessionList } from '@void/account/components/security-forms';
+import { MicrosoftConnection } from '@void/account/components/microsoft-connection';
 export const metadata={title:'Security'};
 function device(agent:string|null){if(!agent)return 'Unknown device';const os=agent.includes('Android')?'Android':/iPhone|iPad/.test(agent)?'iOS':agent.includes('Windows')?'Windows':agent.includes('Mac')?'macOS':agent.includes('Linux')?'Linux':'Device';const browser=agent.includes('Edg/')?'Edge':agent.includes('Firefox/')?'Firefox':agent.includes('Chrome/')?'Chrome':agent.includes('Safari/')?'Safari':'Browser';return `${browser} on ${os}`;}
 export default async function Security({searchParams}:{searchParams:Promise<{error?:string}>}){
