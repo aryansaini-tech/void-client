@@ -19,7 +19,7 @@ export const nextConfig = {
     webpackBuildWorker: process.env.VOID_SINGLE_PROCESS_BUILD === 'true' ? false : undefined,
   },
   transpilePackages: ['@void/ui', '@void/shared', '@void/design-system', '@void/backend', '@void/account', '@void/store'],
-  serverExternalPackages: ['@prisma/client', 'nodemailer'],
+  serverExternalPackages: ['@prisma/client', '.prisma/client', 'nodemailer'],
   poweredByHeader: false,
   reactStrictMode: true,
   images: { formats: ['image/avif', 'image/webp'], remotePatterns: [] },

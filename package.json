@@ -20,6 +20,9 @@
     "dev:store": "npm run dev --workspace=@void/store",
     "dev:backend": "npm run dev --workspace=@void/backend",
     "build": "npm run db:generate && node scripts/workspaces.mjs build",
+    "build:cloudflare": "npm run db:generate && npm run brand:prepare && node scripts/patch-opennext.mjs && npm run build:worker --workspace=@void/website",
+    "deploy:cloudflare": "npm run build:cloudflare && npm run deploy:worker --workspace=@void/website",
+    "patch:opennext": "node scripts/patch-opennext.mjs",
     "start": "node scripts/workspaces.mjs start",
     "lint": "eslint apps packages backend tests scripts",
     "typecheck": "npm run db:generate && node scripts/workspaces.mjs typecheck",
@@ -36,6 +39,7 @@
     "test:http": "node --import ./scripts/register-typescript.mjs --test --test-isolation=none tests/smoke/*.test.ts"
   },
   "devDependencies": {
+    "@opennextjs/cloudflare": "1.20.15",
     "@playwright/test": "^1.56.1",
     "@types/node": "^22.20.1",
     "@types/react": "^19.2.18",
@@ -43,10 +47,11 @@
     "eslint": "9.39.5",
     "eslint-config-next": "16.4.4",
     "prisma": "6.19.3",
+    "sharp": "0.35.5",
     "tsx": "^4.20.6",
     "typescript": "5.9.3",
     "typescript-eslint": "^8.46.0",
-    "zod": "3.25.76",
-    "sharp": "0.35.5"
+    "wrangler": "4.148.0",
+    "zod": "3.25.76"
   }
 }

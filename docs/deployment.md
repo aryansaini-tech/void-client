@@ -1,8 +1,20 @@
-# Independent deployment and DNS
+# Deployment and DNS
 
-> The default website now includes `/store` and `/account`. See [single-origin routing](single-origin.md) for current URLs, server requirements and migration notes. Standalone app instructions below remain available for separate hosting.
+> The default website now includes `/store` and `/account` on `voidclient.org`. For Cloudflare deployment instructions, see the dedicated [Cloudflare Deployment Guide](cloudflare.md). See [single-origin routing](single-origin.md) for current URLs and server requirements. Standalone app instructions below remain available for separate hosting.
 
 These are deployment instructions, not a record of a completed deployment. No hosting project, production database, DNS target, IP address, certificate or payment account has been created.
+
+## Recommended Cloudflare Deployment (Single-Origin)
+
+The unified website (`apps/website`) can be hosted directly on Cloudflare using **Cloudflare Workers + OpenNext** (`@opennextjs/cloudflare`), which packages the dynamic Next.js runtime (server components, API routes, Better Auth, Stripe checkout, Prisma database access) into a Worker while serving static assets via Cloudflare's CDN.
+
+- **Deployment Guide**: [docs/cloudflare.md](cloudflare.md)
+- **Build command**: `npm run build:cloudflare`
+- **Deploy command**: `npm run deploy:cloudflare` (or `npx wrangler deploy` from `apps/website`)
+- **Worker Configuration**: `apps/website/wrangler.jsonc`
+- **Worker Bundle**: `apps/website/.open-next/worker.js`
+- **Assets**: `apps/website/.open-next/assets`
+- **Domain**: `voidclient.org`
 
 ## Suitable hosting
 
