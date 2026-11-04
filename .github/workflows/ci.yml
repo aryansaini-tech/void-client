@@ -32,6 +32,11 @@ jobs:
         env:
           TEST_DATABASE_URL: postgresql://void_test:test-only@localhost:5432/void_integration_test
       - run: npm run build
+        env:
+          VOID_LOCAL_PREVIEW: 'true'
+          NEXT_PUBLIC_WEBSITE_URL: http://localhost:3000
+          NEXT_PUBLIC_ACCOUNT_URL: http://localhost:3000/account
+          NEXT_PUBLIC_STORE_URL: http://localhost:3000/store
       - run: npx playwright install --with-deps chromium webkit
       - run: npm run test:e2e
         env:

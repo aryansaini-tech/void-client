@@ -1,10 +1,10 @@
 import Link from 'next/link';
 import { ArrowDownToLine, ArrowUpRight, ChevronRight, CircleDashed } from 'lucide-react';
-import type { ButtonHTMLAttributes, CSSProperties, ReactNode } from 'react';
+import type { ButtonHTMLAttributes, ReactNode } from 'react';
 
 /** Word masks retain one uninterrupted accessible heading. */
 export function RevealText({ text }: { text: string }) {
-  return <><span className="sr-only">{text}</span><span className="reveal-words" aria-hidden="true">{text.split(/\s+/).map((word, index) => <span className="reveal-word" key={`${word}-${index}`}><span style={{ '--word-delay': `${Math.min(index, 9) * 42}ms` } as CSSProperties}>{word}</span>{' '}</span>)}</span></>;
+  return <><span className="sr-only">{text}</span><span className="reveal-words" aria-hidden="true">{text.split(/\s+/).map((word, index) => <span className="reveal-word" key={`${word}-${index}`}><span>{word}</span>{' '}</span>)}</span></>;
 }
 
 export function ButtonLink({ href, children, variant = 'primary', className = '', external = false, icon = 'arrow' }: { href: string; children: ReactNode; variant?: 'primary' | 'secondary' | 'ghost'; className?: string; external?: boolean; icon?: 'arrow' | 'download' | 'chevron' | 'none' }) {

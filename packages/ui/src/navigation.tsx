@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { ArrowUpRight, Menu, Moon, ShoppingBag, Sun, UserRound, X } from 'lucide-react';
-import { site, websiteNavigation, type AppName } from '@void/shared/config';
+import { site, storeUrl, accountUrl, websiteNavigation, type AppName } from '@void/shared/config';
 import { Wordmark } from './brand';
 import { useMotionPreference } from './motion';
 
@@ -66,17 +66,24 @@ export function Navigation({ app = 'website' }: { app?: AppName }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const links = app === 'website' ? websiteNavigation : app === 'store' ? [
-    { label: 'Store', href: '/' },
-    { label: 'Collection', href: '/products' },
-    { label: 'Categories', href: '/categories' },
-    { label: 'Orders', href: '/orders' },
+    { label: 'Store', href: storeUrl() },
+    { label: 'Collection', href: storeUrl('/products') },
+    { label: 'Categories', href: storeUrl('/categories') },
+    { label: 'Orders', href: storeUrl('/orders') },
     { label: 'Void Client', href: site.urls.website },
   ] : [
     { label: 'Void Client', href: site.urls.website },
     { label: 'Store', href: site.urls.store },
     { label: 'Support', href: `${site.urls.website}/faq` },
   ];
-  const isCurrent = (href: string) => pathname === href || (href.startsWith('/') && href !== '/' && pathname.startsWith(`${href}/`));
+  const isCurrent = (href: string) => {
+    const target = new URL(href, site.urls.website);
+    const base = new URL(site.urls[app]);
+    if (target.origin !== base.origin) return false;
+    const root = base.pathname.replace(/\/$/, '') || '/';
+    const route = target.pathname;
+    return pathname === route || (route !== '/' && route !== root && pathname.startsWith(`${route}/`));
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -144,9 +151,9 @@ export function Navigation({ app = 'website' }: { app?: AppName }) {
             ))}
           </nav>
           <div className="nav-actions">
-            {app === 'store' && <Link className="icon-button" href="/cart" aria-label="Shopping cart"><ShoppingBag size={18} /></Link>}
+            {app === 'store' && <Link className="icon-button" href={storeUrl('/cart')} aria-label="Shopping cart"><ShoppingBag size={18} /></Link>}
             <ThemeToggle />
-            <Link href={app === 'account' ? '/dashboard' : `${site.urls.account}/dashboard`} className="account-link" aria-label="Your Void account">
+            <Link href={accountUrl('/dashboard')} className="account-link" aria-label="Your Void account">
               <UserRound size={17} /><span>Account</span><ArrowUpRight size={14} />
             </Link>
             <button ref={trigger} className="icon-button menu-trigger" type="button" onClick={openMenu} aria-label="Open navigation menu" aria-expanded={open} aria-controls="mobile-navigation">
@@ -179,7 +186,7 @@ export function Navigation({ app = 'website' }: { app?: AppName }) {
           </nav>
           <div className="mobile-menu-bottom">
             <div className="mobile-appearance"><span>Appearance</span><ThemeToggle /></div>
-            <Link href={app === 'account' ? '/dashboard' : `${site.urls.account}/dashboard`} onClick={() => closeMenu(true, false)}>Your Void account <UserRound size={17} /></Link>
+            <Link href={accountUrl('/dashboard')} onClick={() => closeMenu(true, false)}>Your Void account <UserRound size={17} /></Link>
             <p>PLAY BEYOND LIMITS.</p>
           </div>
         </div>

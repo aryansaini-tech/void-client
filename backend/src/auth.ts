@@ -10,9 +10,9 @@ function createAuth() {
   const env = serverEnv(); const db = getDatabase();
   if (!env.BETTER_AUTH_SECRET || env.BETTER_AUTH_SECRET.length < 32) throw new Error('AUTH_NOT_CONFIGURED');
   return betterAuth({
-    appName:'Void Client',baseURL:env.BETTER_AUTH_URL ?? site.urls.account,secret:env.BETTER_AUTH_SECRET,
+    appName:'Void Client',baseURL:new URL(env.BETTER_AUTH_URL ?? site.urls.account).origin,basePath:'/api/auth',secret:env.BETTER_AUTH_SECRET,
     database:prismaAdapter(db,{provider:'postgresql'}),
-    trustedOrigins:[site.urls.website,site.urls.account,site.urls.store],
+    trustedOrigins:[...new Set(Object.values(site.urls).map(url => new URL(url).origin))],
     onAPIError:{errorURL:`${site.urls.account}/login`},
     emailAndPassword:{enabled:true,minPasswordLength:12,maxPasswordLength:128,requireEmailVerification:true,revokeSessionsOnPasswordReset:true,
       sendResetPassword:async ({user,url}) => queueEmail({to:user.email,subject:'Reset your Void password',text:`A password reset was requested for your Void account.\n\n${url}\n\nThis link expires in one hour. If you did not request it, you can ignore this email.`}),

@@ -3,6 +3,7 @@ import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { getSession } from '@void/backend/auth';
 import { getDatabase } from '@void/backend/database';
+import { accountUrl } from '@void/shared/config';
 
 export const currentViewer=cache(async()=>{
   const session=await getSession(await headers());
@@ -12,6 +13,6 @@ export const currentViewer=cache(async()=>{
 });
 export async function requireViewer(path='/dashboard'){
   const viewer=await currentViewer();
-  if(!viewer)redirect(`/login?returnTo=${encodeURIComponent(path)}`);
+  if(!viewer)redirect(accountUrl(`/login?returnTo=${encodeURIComponent(accountUrl(path))}`));
   return viewer;
 }

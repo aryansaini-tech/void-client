@@ -1,5 +1,7 @@
 # Independent deployment and DNS
 
+> The default website now includes `/store` and `/account`. See [single-origin routing](single-origin.md) for current URLs, server requirements and migration notes. Standalone app instructions below remain available for separate hosting.
+
 These are deployment instructions, not a record of a completed deployment. No hosting project, production database, DNS target, IP address, certificate or payment account has been created.
 
 ## Suitable hosting

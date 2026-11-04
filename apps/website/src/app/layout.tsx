@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { site } from '@void/shared/config';
-import { Navigation } from '@void/ui/navigation';
-import { Footer } from '@void/ui/footer';
+import { SiteShell } from '@/components/site-shell';
 import { MotionRoot } from '@void/ui/motion';
 import { AppearanceScript } from '@void/ui/appearance';
 import './globals.css';
@@ -23,12 +22,10 @@ export const viewport: Viewport = { themeColor: '#E5ECF6', width: 'device-width'
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" data-theme="light" suppressHydrationWarning>
-      <head><AppearanceScript /></head>
+      <head><link rel="preload" href="/fonts/Monocraft.otf" as="font" type="font/otf" crossOrigin="anonymous" /><AppearanceScript /></head>
       <body>
         <MotionRoot>
-          <Navigation />
-          {children}
-          <Footer />
+          <SiteShell>{children}</SiteShell>
         </MotionRoot>
       </body>
     </html>

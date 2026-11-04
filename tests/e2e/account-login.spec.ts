@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const account = 'http://localhost:3001';
+const account = 'http://localhost:3000/account';
 
 test('password visibility preserves entered values and toggles each field independently', async ({ page }) => {
   await page.goto(account + '/register');
@@ -24,7 +24,7 @@ test('password visibility preserves entered values and toggles each field indepe
 });
 
 test('recovery and verification retain a trusted checkout destination', async ({ page }) => {
-  const destination = 'http://localhost:3002/checkout';
+  const destination = 'http://localhost:3000/store/checkout';
   const query = '?returnTo=' + encodeURIComponent(destination);
   await page.goto(account + '/login' + query);
 
@@ -39,7 +39,7 @@ test('recovery and verification retain a trusted checkout destination', async ({
   await expect(page).toHaveURL(account + '/login' + query);
 
   await page.goto(account + '/reset-password' + query);
-  await expect(page.getByRole('link', { name: 'Back to sign in', exact: true })).toHaveAttribute('href', '/login' + query);
+  await expect(page.getByRole('link', { name: 'Back to sign in', exact: true })).toHaveAttribute('href', account + '/login' + query);
 });
 
 test('untrusted return destinations are discarded throughout recovery', async ({ page }) => {
@@ -47,9 +47,9 @@ test('untrusted return destinations are discarded throughout recovery', async ({
   for (const path of ['/login', '/forgot-password', '/verify-email', '/reset-password']) {
     await page.goto(account + path + '?returnTo=https%3A%2F%2Funtrusted.example%2Fcheckout');
     if (path === '/login') {
-      await expect(page.getByRole('link', { name: 'Forgot password?', exact: true })).toHaveAttribute('href', '/forgot-password' + fallback);
+      await expect(page.getByRole('link', { name: 'Forgot password?', exact: true })).toHaveAttribute('href', account + '/forgot-password' + fallback);
     } else {
-      await expect(page.getByRole('link', { name: 'Back to sign in', exact: true })).toHaveAttribute('href', '/login' + fallback);
+      await expect(page.getByRole('link', { name: 'Back to sign in', exact: true })).toHaveAttribute('href', account + '/login' + fallback);
     }
   }
 });

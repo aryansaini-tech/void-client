@@ -220,7 +220,7 @@ function AdminStudioDev() {
     e.preventDefault();
     if (!newSneakPeek.name || !newSneakPeek.description) return;
     const item = {
-      id: `peek-${Date.now()}`,
+      id: `peek-${crypto.randomUUID()}`,
       name: newSneakPeek.name,
       title: newSneakPeek.title || newSneakPeek.name,
       description: newSneakPeek.description,
@@ -243,7 +243,7 @@ function AdminStudioDev() {
     e.preventDefault();
     if (!newChangelog.version || !newChangelog.title) return;
     const item: ReleaseEntry = {
-      id: `rel-${Date.now()}`,
+      id: `rel-${crypto.randomUUID()}`,
       version: newChangelog.version,
       date: newChangelog.date,
       title: newChangelog.title,

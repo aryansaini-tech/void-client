@@ -5,11 +5,11 @@ Microsoft uses the existing Better Auth server, PostgreSQL accounts and secure s
 ## Configure the provider
 
 1. In [Microsoft Entra app registrations](https://entra.microsoft.com/), register an application with **personal Microsoft accounts** enabled. Choose the **Web** platform for this server-side authorization-code flow.
-2. Register `http://localhost:3001/api/auth/callback/microsoft` for local development and `https://account.voidclient.org/api/auth/callback/microsoft` for the intended production account domain. Change these if your actual account origin differs. Callback strings must match exactly.
-3. Set `MICROSOFT_CLIENT_ID` to the Application (client) ID. Set `MICROSOFT_CLIENT_SECRET` to the secret **value**, not its identifier. Keep these in the account deployment's server environment, never `NEXT_PUBLIC_*` or committed files.
+2. Register `http://localhost:3000/api/auth/callback/microsoft` for local development and `https://voidclient.org/api/auth/callback/microsoft` for the intended production account domain. Change these if your actual account origin differs. Callback strings must match exactly.
+3. Set `MICROSOFT_CLIENT_ID` to the Application (client) ID. Set `MICROSOFT_CLIENT_SECRET` to the secret **value**, not its identifier. Keep these in the integrated website's (or standalone account deployment's) server environment, never `NEXT_PUBLIC_*` or committed files.
 4. Keep `MICROSOFT_TENANT_ID=consumers` for personal accounts. `common` also permits work/school accounts; `organizations` or a tenant UUID restricts them. The registration's supported account types must agree with this value. Tenant tokens are validated by the installed provider.
 5. Configure `DATABASE_URL`, a random `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, SMTP and `EMAIL_FROM`. Apply existing migrations and run the backend mail worker. Microsoft is intentionally unavailable until account services and verification email are configured.
-6. Restart the account server. Use `npm run check:config` to inspect readiness without printing credentials. Check actual delivery and callback handling on HTTPS before launch; renew expiring Microsoft secrets through your hosting secret manager.
+6. Restart the server hosting the account routes. Use `npm run check:config` to inspect readiness without printing credentials. Check actual delivery and callback handling on HTTPS before launch; renew expiring Microsoft secrets through your hosting secret manager.
 
 Only `openid`, `profile` and `email` scopes are requested. Void does not request Microsoft Graph profile photos, Xbox access or Minecraft ownership. This login does not assert that a person owns Minecraft. If Microsoft does not supply an email address, the UI asks the person to use another account or email sign-in.
 

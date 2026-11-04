@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { Eye,EyeOff } from 'lucide-react';
 import { passwordChangeSchema } from '@void/shared/schemas';
 import { site } from '@void/shared/config';
-import { authClient } from '@/lib/auth-client';
+import { authClient } from '@void/account/lib/auth-client';
 export function PasswordSetup({email,enabled}:{email:string;enabled:boolean}){
   const [busy,setBusy]=useState(false),[error,setError]=useState(''),[success,setSuccess]=useState('');
   async function request(){
