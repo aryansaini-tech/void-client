@@ -4,6 +4,10 @@ import { nextConfig } from '@void/config/next';
 const websiteConfig = {
   ...nextConfig,
   output: 'export',
+  experimental: {
+    ...nextConfig.experimental,
+    workerThreads: false,
+  },
   images: {
     ...nextConfig.images,
     unoptimized: true,

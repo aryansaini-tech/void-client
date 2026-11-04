@@ -10,9 +10,9 @@ export const nextConfig = {
   output: 'standalone',
   outputFileTracingRoot: root,
   turbopack: { root },
-  // Worker threads also support hosts where child-process pipes are restricted.
+  // Worker threads disabled for Cloudflare Pages / CI compatibility (--use-bundled-ca in NODE_OPTIONS).
   experimental: {
-    workerThreads: true,
+    workerThreads: false,
     cpus: 2,
     useTypeScriptCli: false,
     // Optional in-process webpack compilation for restricted Windows hosts.
