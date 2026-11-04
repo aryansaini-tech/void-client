@@ -1,13 +1,21 @@
 import { publicUrl } from './urls';
 
+const isProduction = process.env.NODE_ENV === 'production' && process.env.VOID_LOCAL_PREVIEW !== 'true';
+
+const defaultUrls = {
+  website: isProduction ? 'https://voidclient.org' : 'http://localhost:3000',
+  account: isProduction ? 'https://account.voidclient.org' : 'http://localhost:3001',
+  store: isProduction ? 'https://store.voidclient.org' : 'http://localhost:3002',
+};
+
 export const site = {
   name: 'VOID CLIENT',
   tagline: 'PLAY BEYOND LIMITS.',
   description: 'A new perspective on Minecraft Bedrock. Discover Void Client, explore official updates, and find your next way to play.',
   urls: {
-    website: publicUrl(process.env.NEXT_PUBLIC_WEBSITE_URL, 'http://localhost:3000'),
-    account: publicUrl(process.env.NEXT_PUBLIC_ACCOUNT_URL, 'http://localhost:3001'),
-    store: publicUrl(process.env.NEXT_PUBLIC_STORE_URL, 'http://localhost:3002'),
+    website: publicUrl(process.env.NEXT_PUBLIC_WEBSITE_URL, defaultUrls.website),
+    account: publicUrl(process.env.NEXT_PUBLIC_ACCOUNT_URL, defaultUrls.account),
+    store: publicUrl(process.env.NEXT_PUBLIC_STORE_URL, defaultUrls.store),
   },
   discordInvite: publicUrl(process.env.NEXT_PUBLIC_DISCORD_INVITE || 'https://discord.com/invite/fRs86qQXCT'),
   legal: {
