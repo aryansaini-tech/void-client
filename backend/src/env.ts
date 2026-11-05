@@ -3,7 +3,7 @@ import { site } from '@void/shared/config';
 
 const optional = z.string().optional().transform(value => value?.trim() || undefined);
 const schema = z.object({
-  DATABASE_URL: optional, BETTER_AUTH_SECRET: optional, BETTER_AUTH_URL: optional, AUTH_COOKIE_DOMAIN: optional,
+  DATABASE_URL: optional, DIRECT_URL: optional, BETTER_AUTH_SECRET: optional, BETTER_AUTH_URL: optional, AUTH_COOKIE_DOMAIN: optional,
   AUTH_IP_HEADER: z.string().default('x-real-ip'),
   SMTP_HOST: optional, SMTP_PORT: z.coerce.number().int().min(1).max(65535).default(587),
   SMTP_SECURE: z.enum(['true','false']).default('false'), SMTP_USER: optional, SMTP_PASSWORD: optional, EMAIL_FROM: optional,

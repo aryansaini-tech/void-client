@@ -92,7 +92,7 @@ Set these in **Cloudflare Dashboard** under **Workers & Pages** > `void-website`
 
 | Name | Description | Example / Note |
 | --- | --- | --- |
-| `DATABASE_URL` | PostgreSQL connection string | `postgresql://user:pass@host:5432/void?sslmode=require` |
+| `DATABASE_URL` | Neon pooled PostgreSQL connection string | `postgresql://user:pass@ep-xyz-pooler.region.aws.neon.tech/neondb?sslmode=require` (must include `-pooler`) |
 | `BETTER_AUTH_SECRET` | 32+ char secret for token signing | Generate via `openssl rand -hex 32` |
 | `BETTER_AUTH_URL` | Canonical public origin | `https://voidclient.org` |
 | `STRIPE_SECRET_KEY` | Stripe secret API key | `sk_live_...` (or `sk_test_...`) |
