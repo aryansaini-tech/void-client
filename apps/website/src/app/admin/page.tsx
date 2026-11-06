@@ -7,7 +7,7 @@ import {
   RefreshCw, Eye, Sparkles, ExternalLink,
   Plus, Trash2, Image as ImageIcon, Save,
   Layers, MessageSquare, Newspaper, Settings,
-  ShieldAlert, ArrowLeft
+  ArrowLeft
 } from 'lucide-react';
 import {
   useLiveSiteContent,
@@ -19,7 +19,7 @@ import {
 import { site } from '@void/shared/config';
 import type { ClientModule, ReleaseEntry } from '@void/shared/content';
 import { Badge } from '@void/ui/components';
-import { Wordmark } from '@void/ui/brand';
+import { VoidMark, Wordmark } from '@void/ui/brand';
 
 const PRESET_ASSETS = [
   { label: 'ClickGUI Hero', url: '/media/clickgui-hero.jpg' },
@@ -35,7 +35,7 @@ const PRESET_ASSETS = [
 const subscribeHydration = () => () => {};
 
 export default function AdminPage() {
-  // In production static export, render the immutable restricted advisory directly in static HTML
+  // Management remains unavailable on the public production site.
   if (process.env.NODE_ENV === 'production') {
     return <AdminRestricted />;
   }
@@ -62,39 +62,22 @@ function AdminDevGate() {
 }
 
 /* ========================================================
-   RESTRICTED VIEW FOR PRODUCTION STATIC HOSTING
+   RESTRICTED VIEW FOR THE PUBLIC PRODUCTION SITE
    ======================================================== */
 function AdminRestricted() {
   return (
-    <main id="main" className="container admin-auth-container">
-      <div className="admin-login-card admin-restricted-card">
-        <div className="admin-login-header">
-          <Wordmark animated />
-          <span className="admin-pill admin-pill-restricted">ACCESS RESTRICTED</span>
-          <h1>Admin Studio Restricted</h1>
-          <p>
-            Administrative tools and live customizers are disabled in public static hosting environments.
-            Content updates and management require an authenticated session through the private Void Client control plane.
-          </p>
-        </div>
-
-        <div className="admin-restricted-notice">
-          <ShieldAlert size={20} />
-          <div>
-            <strong>Static Distribution Security Policy</strong>
-            <p>
-              This website is distributed as an immutable static export on Cloudflare Pages.
-              No administrative credentials, authentication handlers, or write APIs are exposed on this host.
-            </p>
-          </div>
-        </div>
-
-        <div className="admin-restricted-actions">
-          <Link href="/" className="button button-primary" style={{ justifyContent: 'center' }}>
-            <ArrowLeft size={16} /> Return to Homepage
+    <main id="main" className="container restricted-page">
+      <VoidMark decorative />
+      <div className="restricted-copy">
+        <p className="eyebrow">Void studio</p>
+        <h1 className="display-heading">This space is private.</h1>
+        <p className="page-description">Site management is not available here. Head back to Void or open your player account.</p>
+        <div className="button-row">
+          <Link href="/" className="button button-primary">
+            <ArrowLeft size={16} /> Back to Void
           </Link>
-          <Link href={`${site.urls.account}/dashboard`} className="button button-secondary" style={{ justifyContent: 'center' }}>
-            Account Portal <ExternalLink size={14} />
+          <Link href={`${site.urls.account}/dashboard`} className="button button-secondary">
+            Your account <ExternalLink size={14} />
           </Link>
         </div>
       </div>

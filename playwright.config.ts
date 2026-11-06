@@ -10,7 +10,7 @@ const environment = {
   NEXT_PUBLIC_WEBSITE_URL: 'http://localhost:3000',
   NEXT_PUBLIC_ACCOUNT_URL: 'http://localhost:3000/account',
   NEXT_PUBLIC_STORE_URL: 'http://localhost:3000/store',
-  DATABASE_URL: database, BETTER_AUTH_SECRET: secret,
+  DATABASE_URL: database, DIRECT_URL: database, BETTER_AUTH_SECRET: secret,
   BETTER_AUTH_URL: 'http://localhost:3000', AUTH_COOKIE_DOMAIN: '',
   SMTP_HOST: database ? '127.0.0.1' : '', SMTP_PORT: '2527', SMTP_SECURE: 'false',
   EMAIL_FROM: database ? 'Void E2E <noreply@example.test>' : '',

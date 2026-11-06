@@ -38,21 +38,22 @@ test('theme controls stay synchronized, persist, and survive a desktop resize', 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
   const headerToggle = page.locator('.site-header .theme-toggle-btn');
-  await headerToggle.click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await headerToggle.click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
   await page.getByRole('button', { name: 'Open navigation menu', exact: true }).click();
   const dialog = page.locator('#mobile-navigation');
   const menuToggle = dialog.locator('.theme-toggle-btn');
-  await expect(menuToggle).toHaveAccessibleName('Switch to light mode');
+  await expect(menuToggle).toHaveAccessibleName('Switch to dark mode');
   await menuToggle.click();
-  await expect(headerToggle).toHaveAccessibleName('Switch to dark mode');
+  await expect(headerToggle).toHaveAccessibleName('Switch to light mode');
   await page.setViewportSize({ width: 1440, height: 960 });
   await expect(dialog).not.toBeVisible();
   await expect(page.locator('body')).not.toHaveCSS('overflow', 'hidden');
   await headerToggle.click();
   await page.reload();
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-  await expect(headerToggle).toHaveAccessibleName('Switch to light mode');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+  await expect(headerToggle).toHaveAccessibleName('Switch to dark mode');
 });
 
 test('theme switching still works when local storage is unavailable', async ({ page }) => {
@@ -64,8 +65,8 @@ test('theme switching still works when local storage is unavailable', async ({ p
   page.on('pageerror', error => errors.push(error.message));
   await page.goto('/');
   await page.locator('.site-header .theme-toggle-btn').click();
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-  await page.locator('.site-header .theme-toggle-btn').click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+  await page.locator('.site-header .theme-toggle-btn').click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   expect(errors).toEqual([]);
 });

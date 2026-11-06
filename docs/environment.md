@@ -26,6 +26,7 @@ Use origins without a path for the three application URL variables. HTTPS is req
 | Variable | Required where / purpose |
 | --- | --- |
 | `DATABASE_URL` | Account, store and worker: PostgreSQL connection; require TLS as appropriate to the provider |
+| `DIRECT_URL` | Prisma migrations: direct PostgreSQL connection, bypassing a hosted transaction pooler. Use the same URL as `DATABASE_URL` for local PostgreSQL. |
 | `BETTER_AUTH_SECRET` | Account, store and worker: same random value, at least 32 characters |
 | `BETTER_AUTH_URL` | Public account origin, matching `NEXT_PUBLIC_ACCOUNT_URL` |
 | `AUTH_COOKIE_DOMAIN` | Production sibling-domain session scope; `voidclient.org` only when all its subdomains are trusted |

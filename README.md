@@ -6,7 +6,7 @@ An original black-and-gold Minecraft Bedrock ecosystem: an editorial product web
 
 The repository root is the `void-client` monorepo. It was created from an empty workspace. No Flarial code, templates, WordPress themes, or third-party component source was copied.
 
-The visual upgrade preserves this existing ecosystem and adds the supplied official logos, an alpha-masked metallic sweep, a warmer champagne-gold theme, shared scroll effects and Microsoft login alongside email. See [the upgrade notes](docs/visual-upgrade.md) and [Microsoft configuration](docs/microsoft-login.md).
+The redesign preserves this ecosystem and the supplied official logos, with a charcoal palette, restrained champagne accents, open editorial layouts, and responsive account/store screens. The default is dark; saved light and reduced-motion preferences remain supported. See [the current art direction](docs/premium-art-direction.md), [verification results](docs/testing.md), and [Microsoft configuration](docs/microsoft-login.md).
 
 ## Start locally
 

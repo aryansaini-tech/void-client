@@ -1,5 +1,7 @@
 # VOID creative direction
 
+This records the earlier voxel direction. The current redesign and verification are documented in [premium art direction](premium-art-direction.md).
+
 The identity uses the supplied official metallic V and full wordmark in an obsidian voxel environment. The artwork's amber edges and champagne highlights guide the palette and restrained lighting. The landscape is original SVG/CSS artwork, not game footage. No borrowed Flarial assets or code.
 
 Tokens: warm black #080706, panel #15120f, edge #30291e, gold #e8bd62, highlight #ffe4a4, white #f7f4ea. Manrope carries headings and body copy; editorial display sizes use tight tracking, with comfortable body line lengths. The supplied logo and requested black-and-gold palette guide the shared theme.

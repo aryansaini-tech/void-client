@@ -44,7 +44,7 @@ export const defaultPageScreenshots: Record<string, PageScreenshotItem> = {
     image: '/media/visual-concept.svg',
     alt: 'Void Client Hero Visual Concept',
     badge: 'Official Hero Artwork',
-    description: 'Prominent showcase of Void architectural scene and metallic-gold emblem.',
+    description: 'The official Void logo, presented with open space and subtle atmospheric lighting.',
   },
   modules: {
     id: 'modules',
@@ -53,7 +53,7 @@ export const defaultPageScreenshots: Record<string, PageScreenshotItem> = {
     image: '/media/interface-concept.svg',
     alt: 'Void Client ClickGUI Module Interface',
     badge: 'ClickGUI Concept',
-    description: 'Frosted champagne-gold ClickGUI module grid with customizable toggles.',
+    description: 'Charcoal interface concept with an open module list and restrained champagne accents.',
   },
   download: {
     id: 'download',

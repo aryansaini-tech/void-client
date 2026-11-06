@@ -1,46 +1,92 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowDown, ArrowUpRight, Blocks, Box, CircleDashed, Layers3, Monitor, Newspaper, ShieldCheck, Sparkles, UserRound } from 'lucide-react';
-import { site } from '@void/shared/config';
-import { ButtonLink, SectionHeading } from '@void/ui/components';
+import { ArrowDown, ArrowUpRight, Compass, Newspaper, ShieldCheck, UserRound } from 'lucide-react';
+import { site, accountUrl } from '@void/shared/config';
+import { ButtonLink } from '@void/ui/components';
 import { DiscordIcon } from '@void/ui/brand';
 import { VoidScene } from '@void/ui/scene';
-import { Magnetic } from '@void/ui/motion';
+import { AmbientLight, Magnetic } from '@void/ui/motion';
+import { Accordion } from '@void/ui/interactive';
 import { ClientShowcase } from '@/components/showcase';
-import { CommunityOrbit } from '@/components/community-orbit';
 import { pageMeta } from '@/lib/metadata';
 
 export const metadata = pageMeta('Play beyond limits.', site.description, '/');
+
 export default function HomePage() {
-  return <main id="main">
+  return <main id="main" className="home-page">
     <section className="hero" aria-labelledby="hero-heading">
-      <div className="container hero-layout"><div className="hero-copy" data-hero-copy>
-        <p className="eyebrow"><span/>The Minecraft Bedrock client</p>
-        <div className="hero-wordmark">VOID CLIENT</div>
-        <h1 id="hero-heading"><span><span>PLAY BEYOND</span></span><span><span>LIMITS.</span></span></h1>
-        <p className="hero-description">A new perspective. A world of possibility.<br/>Meet Void, a Minecraft Bedrock client with a vision that goes beyond the ordinary.</p>
-        <div className="button-row"><Magnetic><ButtonLink href="/download" icon="download">Download Client</ButtonLink></Magnetic><ButtonLink href="/modules" variant="secondary">Explore Modules</ButtonLink></div>
-        <div className="hero-discord"><DiscordIcon/><Link href="/discord">Join Discord <ArrowUpRight size={12}/></Link><span>Find your people.</span></div>
-      </div><div className="hero-art" data-hero-art><VoidScene animated /></div></div>
-      <div className="container hero-bottom"><a href="#discover" className="scroll-hint"><ArrowDown size={14}/>Scroll to discover</a><span className="hero-art-note">Original Void artwork · Not gameplay footage</span></div>
+      <div className="container hero-layout">
+        <div className="hero-copy" data-hero-copy>
+          <p className="hero-kicker"><span /> A new perspective on Bedrock</p>
+          <h1 id="hero-heading">Play beyond<br />limits.</h1>
+          <p className="hero-description">Your world. Your point of view.<br />Discover a different side of Minecraft with Void Client.</p>
+          <div className="button-row">
+            <Magnetic><ButtonLink href="/download" icon="download">Download Client</ButtonLink></Magnetic>
+            <ButtonLink href="/modules" variant="ghost">Explore modules</ButtonLink>
+          </div>
+          <Link href="/discord" className="hero-community"><DiscordIcon /><span>Find your people on Discord</span><ArrowUpRight size={14} /></Link>
+        </div>
+        <AmbientLight className="hero-art" label="Official Void Client logo">
+          <VoidScene animated />
+        </AmbientLight>
+      </div>
+      <div className="container hero-bottom">
+        <a href="#discover" className="scroll-hint"><ArrowDown size={16} />Discover Void</a>
+        <p>Minecraft Bedrock Edition <span className="hero-bottom-divider" /> Client. Community. You.</p>
+      </div>
     </section>
-    <div className="context-strip"><div className="container">
-      <div className="context-item"><Box size={22} strokeWidth={1.3}/><div><strong>Minecraft Bedrock</strong><span>A different perspective</span></div></div>
-      <div className="context-item"><CircleDashed size={22} strokeWidth={1.3}/><div><strong>Official release information</strong><span><Link href="/download">Check availability</Link></span></div></div>
-      <div className="context-item"><Layers3 size={22} strokeWidth={1.3}/><div><strong>One connected ecosystem</strong><span>Client. Account. Store.</span></div></div>
-    </div></div>
-    <section className="container section-pad intro-section" id="discover"><h2 data-reveal="heading">Your world.<br/>A different point of view.</h2><div data-reveal><p>There’s always another way to experience the world you know. Void brings a focused identity to Minecraft Bedrock: considered design, a clear vision, and a place for what comes next.</p><Link href="/about" className="text-link">Get to know Void <ArrowUpRight size={16}/></Link></div></section>
-    <section className="showcase-section section-pad" data-showcase-section><div className="section-light" aria-hidden="true"/><div className="container"><SectionHeading title="A glimpse inside the void." description="Explore the visual direction. These original concepts set the atmosphere while official client screenshots are on their way."><ButtonLink href="/sneak-peeks" variant="ghost">All sneak peeks</ButtonLink></SectionHeading><ClientShowcase/></div></section>
-    <section className="container section-pad"><SectionHeading title="A place for every part of your journey." description="Discover the client, make yourself at home, and stay close to what’s next."/>
-      <div className="feature-grid">
-        <Link className="feature-card" href="/about" data-reveal="card"><span className="card-decoration" aria-hidden="true">VOID</span><Monitor size={26} strokeWidth={1.3}/><h3>Bedrock at the center.</h3><p>A client identity rooted in Minecraft Bedrock, with a clear vision for the experience ahead.</p></Link>
-        <Link className="feature-card" href={`${site.urls.account}/dashboard`} data-reveal="card"><UserRound size={25} strokeWidth={1.3}/><h3>Your own space.</h3><p>One Void account for your profile, security settings, and future purchases.</p></Link>
-        <Link className="feature-card" href="/changelog" data-reveal="card"><Newspaper size={25} strokeWidth={1.3}/><h3>Stay in the loop.</h3><p>Official releases, development previews, and community updates. All in one place.</p></Link>
-      </div><p className="section-note"><ShieldCheck size={13}/>Client capabilities and compatibility are listed only when confirmed in official release information.</p>
+
+    <section id="discover" className="container intro-section section-pad">
+      <h2 data-reveal="heading">A familiar world.<br />A fresh perspective.</h2>
+      <div>
+        <p>There’s more than one way to make a world your own. Void brings the client, your account, and a community of Bedrock players into one considered experience.</p>
+        <Link href="/about" className="text-link">The idea behind Void <ArrowUpRight size={16} /></Link>
+      </div>
     </section>
-    <section className="container section-pad module-preview"><div><p className="eyebrow"><span/>The module library</p><h2 data-reveal="heading">Find your way<br/>to play.</h2><p data-reveal>The official module library will bring verified features, clear descriptions, and release availability together. Explore what’s published as Void takes shape.</p><ButtonLink href="/modules" variant="secondary">Explore Modules</ButtonLink></div><div className="module-preview-graphic" data-reveal><div className="module-preview-top"><span>VOID / MODULE LIBRARY</span><Blocks size={18}/></div>{[0,1,2].map(item=><div className="module-ghost-row" key={item} aria-hidden="true"><span className="module-ghost-icon"/><span className="module-ghost-text"/><span className="module-ghost-switch"/></div>)}<div className="module-placeholder-caption"><CircleDashed size={13}/>Verified module details coming soon</div></div></section>
-    <section className="community-section section-pad"><div className="container community-inner"><div className="community-copy"><p className="eyebrow"><span/>The world is better together</p><h2 data-reveal="heading">Beyond the client.<br/>Into the community.</h2><p data-reveal>For the conversations between sessions. The ideas that turn into something. The people who see the world a little differently. Find your place in Void.</p><ButtonLink href="/discord">Join the community</ButtonLink></div><CommunityOrbit/></div></section>
-    <section className="container partner-preview"><div><h2 data-reveal="heading">Good company. Shared ambition.</h2><p>Meet the networks and communities alongside Void.</p></div><div className="partner-wordmark" data-reveal="right"><Image className="partner-logo-preview" src="/media/partners/zerix.webp" alt="Zerix Network logo" width={65} height={65}/><div><strong>ZERIX NETWORK</strong><span>Partner details coming soon</span></div></div><Link href="/partners" className="text-link">Our partners <ArrowUpRight size={15}/></Link></section>
-    <section className="final-cta"><div className="container"><p className="eyebrow"><Sparkles size={13}/>A new perspective awaits</p><h2 data-reveal="heading">The next chapter is yours.</h2><p>Discover Void Client. See where it takes you.</p><div className="button-row"><ButtonLink href="/download" icon="download">Download Client</ButtonLink><ButtonLink href="/discord" variant="secondary">Join Discord</ButtonLink></div></div></section>
+
+    <section className="showcase-section section-pad" data-showcase-section aria-labelledby="showcase-heading">
+      <div className="container">
+        <div className="showcase-heading">
+          <div><p className="section-kicker">Inside Void</p><h2 id="showcase-heading" data-reveal="heading">Details make<br />the difference.</h2></div>
+          <div><p>A closer look at the interface, the atmosphere, and the ideas taking shape.</p><Link className="text-link" href="/sneak-peeks">Explore the gallery <ArrowUpRight size={16} /></Link></div>
+        </div>
+        <ClientShowcase />
+      </div>
+    </section>
+
+    <section className="container experience-section section-pad" aria-labelledby="experience-heading">
+      <div className="experience-intro"><p className="section-kicker">One connected experience</p><h2 id="experience-heading" data-reveal="heading">The game is<br />just the beginning.</h2><p>Your next session, your own space, and everything that comes after.</p></div>
+      <div className="experience-stories">
+        <Link className="feature-card" href="/modules"><Compass size={24} strokeWidth={1.4} /><div><h3>Find your way to play.</h3><p>Explore modules by category, with clear descriptions and release availability.</p></div><ArrowUpRight size={20} /></Link>
+        <Link className="feature-card" href={accountUrl('/dashboard')}><UserRound size={24} strokeWidth={1.4} /><div><h3>A space that’s yours.</h3><p>Your profile, connected accounts, and purchases. All together.</p></div><ArrowUpRight size={20} /></Link>
+        <Link className="feature-card" href="/changelog"><Newspaper size={24} strokeWidth={1.4} /><div><h3>Follow what’s next.</h3><p>Official release notes and development previews, straight from Void.</p></div><ArrowUpRight size={20} /></Link>
+      </div>
+    </section>
+
+    <section className="community-section section-pad" aria-labelledby="community-heading">
+      <div className="container community-editorial">
+        <div className="community-signature" aria-hidden="true"><DiscordIcon /><span>Good company.<br />Great possibilities.</span></div>
+        <div className="community-copy"><p className="section-kicker">The people behind the pixels</p><h2 id="community-heading" data-reveal="heading">Between sessions.<br />Beyond the game.</h2><p>Trade ideas. Share a discovery. Find someone who sees the world the way you do. There’s a place for you in the Void community.</p><ButtonLink href="/discord" variant="secondary">Join the community</ButtonLink></div>
+      </div>
+    </section>
+
+    <section className="container home-help section-pad" aria-labelledby="home-help-heading">
+      <div><p className="section-kicker">A little clarity</p><h2 id="home-help-heading">Before you<br />step inside.</h2><Link className="text-link" href="/faq">All questions <ArrowUpRight size={16} /></Link></div>
+      <div className="home-questions">
+        <Accordion question="Is Void for Bedrock or Java Edition?">Void Client is for Minecraft Bedrock Edition. Supported Bedrock versions will be listed with each official release.</Accordion>
+        <Accordion question="Where can I download Void?">Visit the Download page for official files and platform availability. A “Coming soon” label means a verified download has not been published yet.</Accordion>
+        <Accordion question="What is a Void account for?">Your account brings your profile, security settings, linked accounts, and purchase history together in one place.</Accordion>
+      </div>
+    </section>
+
+    <section className="container partner-preview">
+      <p>In good company.</p>
+      <Link href="/partners" className="partner-wordmark"><Image src="/media/partners/zerix.webp" alt="" width={42} height={42} /><strong>Zerix Network</strong><ArrowUpRight size={16} /></Link>
+      <span>Partner profile coming soon</span>
+    </section>
+
+    <section className="final-cta">
+      <div className="container final-cta-inner"><div><p className="section-kicker">Your next chapter</p><h2 data-reveal="heading">See what’s beyond.</h2></div><div><ButtonLink href="/download" icon="download">Download Client</ButtonLink><p><ShieldCheck size={14} /> Official downloads. Clear availability.</p></div></div>
+    </section>
   </main>;
 }

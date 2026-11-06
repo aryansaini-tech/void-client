@@ -61,14 +61,9 @@ export function ClientShowcase() {
             </button>
           ))}
         </div>
-        <Badge gold>Preview the visual direction</Badge>
+        <Badge>Design concepts</Badge>
       </div>
       <div className="showcase-frame" data-showcase-frame>
-        <div className="showcase-window-bar">
-          <span className="window-dots"><i /><i /><i /></span>
-          <span>VOID CLIENT / DESIGN EXPLORATION</span>
-          <span>CONCEPT</span>
-        </div>
         <div
           className="showcase-visual"
           role="tabpanel"
@@ -101,7 +96,7 @@ export function ClientShowcase() {
       <div className="showcase-caption" aria-live="polite">
         <div>
           <h3>{selected.title}</h3>
-          <p>{selected.description}</p>
+          <p><span className="showcase-status">{selected.status}.</span> {selected.description}</p>
         </div>
         <span className="showcase-counter">
           <b>0{selectedIndex + 1}</b> / 0{showcase.length}

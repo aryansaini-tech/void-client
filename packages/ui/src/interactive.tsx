@@ -2,9 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import Image from 'next/image';
-import { Check, Copy, Search, X, ZoomIn } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { useMotionPreference } from './motion';
+import { ArrowLeft, ArrowRight, Check, Copy, Search, X, ZoomIn } from 'lucide-react';
 import { useHydrated } from './hydration';
 
 export function SearchField({ value, onChange, placeholder = 'Search', label = 'Search' }: { value: string; onChange: (value: string) => void; placeholder?: string; label?: string }) {
@@ -34,19 +32,22 @@ export type GalleryImage = { image: string; alt: string; name: string; descripti
 export function Gallery({ items }: { items: readonly GalleryImage[] }) {
   const [selected, setSelected] = useState<GalleryImage | null>(null);
   const dialog = useRef<HTMLDialogElement>(null);
-  const reduced = useMotionPreference();
+  const trigger = useRef<HTMLButtonElement>(null);
+  const isOpen = selected !== null;
   useEffect(() => {
-    if (!selected) return;
+    if (!isOpen) return;
     const previous = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     dialog.current?.showModal();
     return () => { document.body.style.overflow = previous; };
-  }, [selected]);
+  }, [isOpen]);
   const close = () => { dialog.current?.close(); setSelected(null); };
-  return <><div className="gallery-grid">{items.map((item, index) => <motion.button type="button" className={`gallery-card ${index === 0 ? 'gallery-featured' : ''}`} key={item.name} onClick={() => setSelected(item)} whileHover={reduced ? {} : { y: -4 }} transition={{ duration: .2 }} aria-label={`Preview ${item.name}`}>
-    <div className="gallery-image"><Image src={item.image} alt={item.alt} fill sizes={index === 0 ? '(max-width: 700px) 100vw, 70vw' : '(max-width: 700px) 100vw, 45vw'}/><span className="gallery-zoom"><ZoomIn size={18}/></span><span className="image-label">{item.status}</span></div><div className="gallery-caption"><h2>{item.name}</h2><span>View preview</span></div>
-  </motion.button>)}</div>
-  <dialog ref={dialog} className="lightbox" aria-labelledby="lightbox-title" onClose={() => setSelected(null)} onClick={event => { if (event.target === event.currentTarget) close(); }}>
-    {selected && <div className="lightbox-panel"><button type="button" className="icon-button lightbox-close" onClick={close} aria-label="Close preview"><X size={22}/></button><div className="lightbox-image"><Image src={selected.image} alt={selected.alt} fill sizes="90vw"/></div><div className="lightbox-caption"><span className="badge">{selected.status}</span><h2 id="lightbox-title">{selected.name}</h2><p>{selected.description}</p></div></div>}
+  const selectedIndex = selected ? items.findIndex(item => item.name === selected.name) : -1;
+  const step = (offset: number) => { if (items.length > 1) setSelected(items[(selectedIndex + offset + items.length) % items.length] ?? null); };
+  return <><div className="gallery-grid">{items.map((item, index) => <button type="button" className={`gallery-card ${index === 0 ? 'gallery-featured' : ''}`} key={item.name} onClick={event => { trigger.current = event.currentTarget; setSelected(item); }} aria-label={`Preview ${item.name}`}>
+    <div className="gallery-image"><Image src={item.image} alt={item.alt} fill loading={index === 0 ? 'eager' : 'lazy'} sizes={index === 0 ? '(max-width: 767px) 100vw, 90vw' : '(max-width: 767px) 100vw, 45vw'}/><span className="gallery-zoom"><ZoomIn size={18}/></span><span className="image-label">{item.status}</span></div><div className="gallery-caption"><div><h2>{item.name}</h2><p>{item.description}</p></div><span>View preview</span></div>
+  </button>)}</div>
+  <dialog ref={dialog} className="lightbox" aria-labelledby="lightbox-title" aria-describedby="lightbox-description" onClose={() => { setSelected(null); trigger.current?.focus({ preventScroll: true }); }} onClick={event => { if (event.target === event.currentTarget) close(); }} onKeyDown={event => { if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') { event.preventDefault(); step(event.key === 'ArrowRight' ? 1 : -1); } }}>
+    {selected && <div className="lightbox-panel"><button type="button" className="icon-button lightbox-close" onClick={close} aria-label="Close preview"><X size={22}/></button><div className="lightbox-image"><Image src={selected.image} alt={selected.alt} fill sizes="90vw"/></div><div className="lightbox-caption"><div className="lightbox-meta"><span className="badge">{selected.status}</span><div className="lightbox-navigation" aria-label="Gallery controls"><button type="button" className="icon-button" aria-label="Previous preview" disabled={items.length < 2} onClick={() => step(-1)}><ArrowLeft size={19}/></button><span>{selectedIndex + 1} / {items.length}</span><button type="button" className="icon-button" aria-label="Next preview" disabled={items.length < 2} onClick={() => step(1)}><ArrowRight size={19}/></button></div></div><div aria-live="polite"><h2 id="lightbox-title">{selected.name}</h2><p id="lightbox-description">{selected.description}</p></div></div></div>}
   </dialog></>;
 }

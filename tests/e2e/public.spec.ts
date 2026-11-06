@@ -16,7 +16,9 @@ test('every public route renders with metadata and no broken local assets', asyn
     if (response.status() >= 400 && /\/_next\/|\/media\/|\/brand\//.test(response.url())) errors.push(`${response.status()} ${response.url()}`);
   });
   for (const route of websiteRoutes) {
-    const response = await page.goto(route);
+    // Finish this local document's assets and prefetches before replacing it.
+    // WebKit reports in-flight prefetches as access errors during document teardown.
+    const response = await page.goto(route, { waitUntil: 'networkidle' });
     expect(response?.status()).toBe(200);
     await expect(page.locator('main h1')).toHaveCount(1);
     await expect(page).toHaveTitle(/Void/i);
@@ -30,7 +32,7 @@ test('every public route renders with metadata and no broken local assets', asyn
     'http://localhost:3000/store/products', 'http://localhost:3000/store/categories',
     'http://localhost:3000/store/search', 'http://localhost:3000/store/cart', 'http://localhost:3000/store/checkout',
   ]) {
-    expect((await page.goto(url))?.status()).toBe(200);
+    expect((await page.goto(url, { waitUntil: 'networkidle' }))?.status()).toBe(200);
     await expect(page.locator('main h1')).toHaveCount(1);
     await noOverflow(page);
   }
@@ -103,8 +105,46 @@ test('showcase keyboard selection and gallery lightbox retain accessible control
   await page.getByRole('button', { name: 'Preview ClickGUI', exact: true }).click();
   await expect(page.getByRole('dialog')).toBeVisible();
   await expect(page.getByRole('dialog')).toContainText('Design concept');
+  await page.getByRole('button', { name: 'Next preview', exact: true }).click();
+  await expect(page.getByRole('dialog')).toHaveAccessibleName('HUD');
+  await page.keyboard.press('ArrowLeft');
+  await expect(page.getByRole('dialog')).toHaveAccessibleName('ClickGUI');
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog')).not.toBeVisible();
+  await expect(page.getByRole('button', { name: 'Preview ClickGUI', exact: true })).toBeFocused();
+});
+
+test('the official hero logo remains sharp, proportioned and separate from the copy', async ({ page }, info) => {
+  test.skip(info.project.name !== 'chromium-desktop', 'The viewport matrix runs once.');
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  for (const width of [320, 390, 768, 1024, 1440, 1920]) {
+    await page.setViewportSize({ width, height: 960 });
+    await page.goto('/');
+    const logo = page.locator('.hero-art .brand-image');
+    await expect(logo).toBeVisible();
+    await expect(logo).toHaveAttribute('src', '/brand/logo.png');
+    const geometry = await logo.evaluate(image => {
+      const source = image as HTMLImageElement;
+      const mark = image.getBoundingClientRect();
+      const copy = document.querySelector('.hero-copy')!.getBoundingClientRect();
+      const art = document.querySelector('.hero-art')!;
+      return {
+        loaded: source.complete && source.naturalWidth > 0,
+        natural: source.naturalWidth / source.naturalHeight,
+        rendered: mark.width / mark.height,
+        withinViewport: mark.left >= 0 && mark.right <= innerWidth && mark.top >= 0 && mark.bottom <= innerHeight,
+        overlapsCopy: mark.left < copy.right && mark.right > copy.left && mark.top < copy.bottom && mark.bottom > copy.top,
+        opacity: getComputedStyle(art).opacity,
+        filter: getComputedStyle(image).filter,
+      };
+    });
+    expect(geometry.loaded).toBe(true);
+    expect(geometry.rendered).toBeCloseTo(geometry.natural, 2);
+    expect(geometry.withinViewport).toBe(true);
+    expect(geometry.overlapsCopy).toBe(false);
+    expect(geometry.opacity).toBe('1');
+    expect(geometry.filter).toBe('none');
+  }
 });
 
 test('direct routes, refresh, history and reduced motion remain native', async ({ page }) => {

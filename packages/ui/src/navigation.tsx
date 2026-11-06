@@ -13,13 +13,13 @@ type Theme = 'dark' | 'light';
 const themeEvent = 'void:theme-change';
 
 function themeSnapshot(): Theme {
-  return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+  return document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
 }
 
 function subscribeTheme(update: () => void) {
   const storage = (event: StorageEvent) => {
     if (event.key !== null && event.key !== 'void-theme') return;
-    document.documentElement.dataset.theme = event.newValue === 'dark' ? 'dark' : 'light';
+    document.documentElement.dataset.theme = event.newValue === 'light' ? 'light' : 'dark';
     update();
   };
   window.addEventListener(themeEvent, update);
@@ -31,7 +31,7 @@ function subscribeTheme(update: () => void) {
 }
 
 export function ThemeToggle() {
-  const theme = useSyncExternalStore(subscribeTheme, themeSnapshot, (): Theme => 'light');
+  const theme = useSyncExternalStore(subscribeTheme, themeSnapshot, (): Theme => 'dark');
   function toggle() {
     const next = themeSnapshot() === 'light' ? 'dark' : 'light';
     document.documentElement.dataset.theme = next;

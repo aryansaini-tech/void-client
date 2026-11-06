@@ -6,7 +6,7 @@ import { MotionConfig } from 'framer-motion';
 
 const preferenceEvent = 'void:motion-preference';
 const preferenceContext = createContext(false);
-const revealSelector = '[data-reveal], .feature-card, .module-card, .benefit-card, .partner-card, .product-card, .info-card, .portal-card, .download-main, .timeline-entry, .accordion, .gallery-card, .steps-grid > div';
+const revealSelector = '[data-reveal]';
 let sessionPreference: boolean | undefined;
 
 function savedReducedMotion() {
@@ -367,4 +367,47 @@ export function Magnetic({ children }: { children: ReactNode }) {
   }, [reduced]);
 
   return <div ref={ref} className="magnetic">{children}</div>;
+}
+
+/** Move only the ambient light: the official logo keeps its original geometry. */
+export function AmbientLight({ children, className = '', label }: { children: ReactNode; className?: string; label: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const reduced = useMotionPreference();
+
+  useEffect(() => {
+    const element = ref.current;
+    if (!element || reduced || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    let frame = 0;
+    let bounds: DOMRect | null = null;
+    const enter = () => { bounds = element.getBoundingClientRect(); };
+    const move = (event: PointerEvent) => {
+      if (!bounds) return;
+      const x = Math.max(-20, Math.min(20, (event.clientX - bounds.left - bounds.width / 2) * .055));
+      const y = Math.max(-16, Math.min(16, (event.clientY - bounds.top - bounds.height / 2) * .055));
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        element.style.setProperty('--light-x', `${x}px`);
+        element.style.setProperty('--light-y', `${y}px`);
+      });
+    };
+    const reset = () => {
+      cancelAnimationFrame(frame);
+      bounds = null;
+      element.style.removeProperty('--light-x');
+      element.style.removeProperty('--light-y');
+    };
+    element.addEventListener('pointerenter', enter);
+    element.addEventListener('pointermove', move);
+    element.addEventListener('pointerleave', reset);
+    element.addEventListener('pointercancel', reset);
+    return () => {
+      reset();
+      element.removeEventListener('pointerenter', enter);
+      element.removeEventListener('pointermove', move);
+      element.removeEventListener('pointerleave', reset);
+      element.removeEventListener('pointercancel', reset);
+    };
+  }, [reduced]);
+
+  return <div ref={ref} className={className} role="img" aria-label={label}>{children}</div>;
 }

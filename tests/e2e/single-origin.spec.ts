@@ -88,14 +88,15 @@ test('mobile branding is proportioned, centered and stable through scroll and me
 test('fast scrolling and resizing reveal content without moving the document layout', async ({ page }) => {
   await page.goto('/');
   await page.evaluate(() => document.fonts.ready);
-  const before = await page.locator('.feature-grid').evaluate(element => ({ top: (element as HTMLElement).offsetTop, height: element.getBoundingClientRect().height }));
-  await page.locator('.feature-grid').scrollIntoViewIfNeeded();
+  const before = await page.locator('.experience-stories').evaluate(element => ({ top: (element as HTMLElement).offsetTop, height: element.getBoundingClientRect().height }));
+  await page.locator('.experience-stories').scrollIntoViewIfNeeded();
   await expect(page.locator('.feature-card').last()).toHaveCSS('opacity', '1');
-  const after = await page.locator('.feature-grid').evaluate(element => ({ top: (element as HTMLElement).offsetTop, height: element.getBoundingClientRect().height }));
+  const after = await page.locator('.experience-stories').evaluate(element => ({ top: (element as HTMLElement).offsetTop, height: element.getBoundingClientRect().height }));
   expect(after).toEqual(before);
   await page.setViewportSize({ width: 375, height: 812 });
   await expect(page.locator('.hero-art')).toHaveCSS('transform', 'none');
   await page.emulateMedia({ reducedMotion: 'reduce' });
+  await expect(page.locator('html')).toHaveAttribute('data-reduced-motion', 'true');
   expect(await page.evaluate(() => document.getAnimations().filter(animation => animation.id === 'void-reveal' && animation.playState === 'running').length)).toBe(0);
   await page.locator('.footer-brand').scrollIntoViewIfNeeded();
   await expect(page.locator('.scroll-progress > span')).not.toHaveCSS('transform', 'matrix(0, 0, 0, 1, 0, 0)');
@@ -105,7 +106,7 @@ test('offscreen content animates once as it enters the viewport', async ({ page 
   await page.goto('/');
   await page.evaluate(() => document.fonts.ready);
   await expect(page.locator('.site-header .brand-asset-mark')).toHaveAttribute('data-logo-active', 'true');
-  const card = page.locator('.feature-card').first();
+  const card = page.locator('#experience-heading');
   await expect(card).toBeVisible();
   const result = await card.evaluate(async element => {
     const animate = element.animate;

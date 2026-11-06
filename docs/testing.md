@@ -1,31 +1,33 @@
-# Verification report: single-origin store and account
+# Verification report: Void redesign and recovery
 
-Verified on **5 November 2026 (Asia/Kolkata)** in the supplied Windows workspace with Node.js 24.19.0, npm 12.2.0, production Next.js servers, and a fresh disposable PostgreSQL database. This replaces the 3 November report; browser execution was available for this round through Playwright. No deployment, DNS change, or production database operation was performed.
+Verified on **6 November 2026 (Asia/Kolkata)** in the supplied Windows workspace with Node.js 24.19.0, npm 12.2.0, production Next.js servers, and the disposable local PostgreSQL database. The redesign was recovered from the existing working tree; repository screenshots and source files supplied the design context. This replaces the 5 November results. No production database operation, provider transaction, external email, or DNS change was performed.
 
 ## Results
 
 | Check | Executed result |
 | --- | --- |
 | Production builds | Website, account, store, and backend all passed after the final application fixes |
+| Cloudflare build | `npm run build:cloudflare` passed with the production public URLs and generated the OpenNext Worker bundle |
 | Monorepo typecheck | Passed for all applications and backend |
 | Test TypeScript compilation | `npx tsc --project tsconfig.tests.json --noEmit` passed |
 | Lint | `npm run lint` passed |
 | Unit tests | **23 passed, 0 failed** |
 | PostgreSQL integration | **19 passed, 0 failed** |
 | Production HTTP smoke tests | **37 passed, 0 failed**, including configured authentication and cart flow |
-| Browser coverage | **66 distinct test/project combinations passed across the full run and targeted reruns**; 6 intentional duplicate skips |
-| Final browser rerun | **6 passed, 0 failed**: single-origin navigation and actual reveal/replay checks on all three browser projects |
+| Complete browser suite | **67 passed, 0 failed, 8 intentional duplicate skips**, in one fresh 75-combination run on desktop Chromium, mobile Chromium, and mobile WebKit |
+| Migration configuration | `npm run db:deploy` passed with `DATABASE_URL` and `DIRECT_URL` set to the same local test database; CI now supplies both |
+| Visual and interaction review | 28 state checks and 34 account/store captures passed; local screenshots were visually inspected |
 | Patch whitespace | `git diff --check` passed |
 
-Node's test counts include parent groups. Browser counts refer to test/project combinations, not individual assertions. The six skips run the viewport matrix, configured account flow, and configured catalog flow only once instead of duplicating them on both mobile projects.
+Node's test counts include parent groups. Browser counts refer to test/project combinations, not individual assertions. The eight skips run the viewport matrix, official-logo geometry matrix, configured account flow, and configured catalog flow once instead of duplicating them on both mobile projects.
 
 ### Browser run history and fixes
 
-The first full run executed 72 combinations: 59 passed, 7 failed, and 6 intentionally skipped. The failures exposed homepage content hidden behind a streamed root loading boundary without JavaScript, WebKit input entered before hydration, an insufficient timeout for the multi-page public-route matrix, and an animation assertion that could miss a short reveal.
+The interrupted redesign session left a 75-combination browser report with 64 passes, three WebKit failures, and eight intentional skips. The failures concerned unfinished route prefetches during document teardown, gallery focus restoration, and a reduced-motion assertion made before the preference update completed.
 
-The root website loader was removed, interactive fields wait until handlers are attached, the multi-page test has a bounded 120-second timeout, and the animation test records real Web Animations API calls while preserving their behavior. It checks that the reveal finishes and does not replay on a return scroll. Navigation testing waits for fonts and the initialized shell before jumping straight to the footer.
+The saved implementation already restored focus to the lightbox trigger, and the saved tests waited for route assets and the live motion preference. Recovery rebuilt those files and ran the entire suite successfully. No failed checks were removed or changed to skips. Existing checks continue to cover readable HTML without JavaScript, hydration-ready fields, native scrolling, and actual Web Animations API reveal completion without replay.
 
-A 21-combination targeted rerun passed 17 with 2 intentional skips and 2 intermittent WebKit navigation/animation failures. Both checks then passed twice in a focused WebKit run. After tightening the test synchronization, the final six-combination run passed on desktop Chromium, mobile Chromium, and mobile WebKit. **A fresh full 72-combination run was not performed after those corrections.**
+The first recovery build encountered a Windows file lock from local preview servers. Stopping those processes resolved it; website, account, store, and backend then built successfully.
 
 ## Coverage
 
@@ -61,7 +63,7 @@ $env:NEXT_PUBLIC_STORE_URL='http://localhost:3000/store'
 npm.cmd run build
 ```
 
-Create a disposable PostgreSQL database whose name ends in `_test`. Apply the existing migration with `DATABASE_URL` pointing to it, then supply that same URL as `TEST_DATABASE_URL` for `npm run test:integration` and `npm run test:e2e`. The integration suite uses a localhost SMTP sink on port 2526. Playwright configures and starts the built servers with local fixture credentials; leave `VOID_E2E_REUSE_SERVERS` unset unless deliberately reusing servers with matching configuration.
+Create a disposable PostgreSQL database whose name ends in `_test`. Apply the existing migration with both `DATABASE_URL` and `DIRECT_URL` pointing to it, then supply that same URL as `TEST_DATABASE_URL` for `npm run test:integration` and `npm run test:e2e`. The integration suite uses a localhost SMTP sink on port 2526. Playwright configures and starts the built servers with local fixture credentials; leave `VOID_E2E_REUSE_SERVERS` unset unless deliberately reusing servers with matching configuration.
 
 For configured HTTP tests, run the production servers on ports 3000–3002 with the same disposable database, auth secret, localhost public URLs, `BETTER_AUTH_URL=http://localhost:3000`, empty `AUTH_COOKIE_DOMAIN`, and local email queuing configured. Keep the mail worker stopped for this scenario. Run `npm run test:http` with that same environment, `TEST_DATABASE_URL`, and `VOID_HTTP_CONFIGURED=true`; it reads only its own queued verification message. Never use customer data for these fixtures.
 

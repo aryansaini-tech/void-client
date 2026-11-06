@@ -30,6 +30,7 @@ Copy `.env.example` to `.env`, preserving the three localhost URLs. For the supp
 
 ```dotenv
 DATABASE_URL=postgresql://void_local:local-development-only@localhost:5432/void_local
+DIRECT_URL=postgresql://void_local:local-development-only@localhost:5432/void_local
 BETTER_AUTH_URL=http://localhost:3001
 SMTP_HOST=127.0.0.1
 SMTP_PORT=1025
@@ -81,7 +82,7 @@ npm run typecheck
 npm test
 ```
 
-Create a separate PostgreSQL database whose name ends in `_test`; set `TEST_DATABASE_URL` to it. Apply the committed migration to that database using `DATABASE_URL`, then run `npm run test:integration`. The test suite uses a local SMTP sink on port 2526, synthetic test-only records, and locally signed Stripe fixture events. No provider transaction or external email occurs.
+Create a separate PostgreSQL database whose name ends in `_test`; set `TEST_DATABASE_URL` to it. Apply the committed migration with both `DATABASE_URL` and `DIRECT_URL` pointing to that test database, then run `npm run test:integration`. The test suite uses a local SMTP sink on port 2526, synthetic test-only records, and locally signed Stripe fixture events. No provider transaction or external email occurs.
 
 For browser checks install Playwright's Chromium and WebKit binaries with `npx playwright install chromium webkit`, build the apps, and run `npm run test:e2e`. See [testing](testing.md) for coverage and actual environment results.
 

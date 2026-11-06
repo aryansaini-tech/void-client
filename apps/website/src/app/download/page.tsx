@@ -7,7 +7,7 @@ export const metadata = pageMeta('Download', 'Find verified Void Client download
 
 export default function DownloadPage() {
   return (
-    <main id="main">
+    <main id="main" className="download-page">
       <PageIntro
         eyebrow="Your next chapter"
         title="Enter the void."
