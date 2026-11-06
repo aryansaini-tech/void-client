@@ -2,7 +2,17 @@
 
 Verified on **6 November 2026 (Asia/Kolkata)** in the supplied Windows workspace with Node.js 24.19.0, npm 12.2.0, production Next.js servers, and the disposable local PostgreSQL database. The redesign was recovered from the existing working tree; repository screenshots and source files supplied the design context. This replaces the 5 November results. No production database operation, provider transaction, external email, or DNS change was performed.
 
-## Results
+## Clean-install deployment build follow-up
+
+The Pages log for commit `d767b54` exposed a build entry point the original verification did not cover: `npm run brand:prepare && npm run build --workspace=@void/website`. Unlike the root build commands, it did not generate Prisma before TypeScript ran. The earlier builds had a generated client and therefore did not catch this case.
+
+In a separate source copy with freshly installed dependencies and Prisma's default ungenerated client, the original workspace build reproduced the exact dashboard error at `page.tsx:34:72`. After applying the `prebuild` hook, the same workspace build generated Prisma 6.19.3 and completed compilation, strict TypeScript checks, page generation, and standalone output without a database or a local `.env` file. The account and store generation hooks also passed. No application types were weakened or assertions added to hide the error.
+
+Lint, the full monorepo/test TypeScript check, and all 23 unit tests passed again. The production `npm run build:cloudflare` also passed, including Next.js compilation, strict TypeScript checks, page generation, and the final OpenNext Worker bundle. CI now explicitly skips automatic Prisma generation during installation and builds the website before any other generation step, making the missing-client case part of the normal workflow. The application behavior is unchanged; the full integration, HTTP, and browser results below are from the preceding redesign verification.
+
+The supplied log is still from Cloudflare **Pages**. The OpenNext artifact targets **Workers**. A repository build fix does not change that external project type; see [the Cloudflare setup and troubleshooting instructions](cloudflare.md#existing-pages-build-failures).
+
+## Redesign verification results
 
 | Check | Executed result |
 | --- | --- |

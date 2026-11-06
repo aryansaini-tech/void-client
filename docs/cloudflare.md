@@ -2,6 +2,16 @@
 
 This document details the configuration, prerequisites, dashboard settings, and deployment steps for hosting the unified Void Client application (`apps/website`) on Cloudflare using **OpenNext for Cloudflare** (`@opennextjs/cloudflare`) and **Cloudflare Workers with Static Assets**.
 
+## Existing Pages build failures
+
+A log mentioning `pages_build_output_dir` is a **Pages** deployment. This repository's Wrangler files configure a **Worker**. The OpenNext output cannot be deployed by pointing a Pages project's output directory at `.next` or `.open-next/assets`; the latter contains only assets, not the application server.
+
+The old command `npm run brand:prepare && npm run build --workspace=@void/website` also skipped Prisma generation. On a clean install, the client had no schema-specific types, causing the dashboard's `activity.map(event => ...)` to fail with an implicit `any`. Each Next.js app now has a `prebuild` hook that generates the client from `backend/prisma/schema.prisma`. The CI workflow builds the website before any other generation step to cover this exact entry point.
+
+For the full application, connect `main` to a Worker named `voidclient-website` with repository root `/`, build command `npm run build:cloudflare`, and deploy command `npm run deploy:worker --workspace=@void/website`. A Pages project cannot be converted just by changing its build command. If only Pages exists, create the Worker project first and verify its preview before transferring the custom domain. Keep the current Pages deployment available until that check passes.
+
+Cloudflare documents [OpenNext on Workers](https://developers.cloudflare.com/workers/framework-guides/web-apps/opennext/). This project retains its existing OpenNext integration.
+
 ---
 
 ## 1. Architecture Overview
@@ -56,7 +66,7 @@ When connecting your GitHub repository directly to Cloudflare:
      ```
    - **Deploy command** (if prompted):
      ```sh
-     npx wrangler deploy --config apps/website/wrangler.jsonc
+     npm run deploy:worker --workspace=@void/website
      ```
 4. **Compatibility Settings**:
    - **Compatibility date**: `2026-03-01`
@@ -78,21 +88,22 @@ npx wrangler login
 # 2. Run the production Cloudflare build
 npm run build:cloudflare
 
-# 3. Deploy the worker and assets
-npm run deploy:cloudflare
+# 3. Deploy the built worker and assets
+npm run deploy:worker --workspace=@void/website
 ```
 
 ---
 
 ## 4. Environment Variables and Secrets
 
-Set these in **Cloudflare Dashboard** under **Workers & Pages** > `void-website` > **Settings** > **Variables and Secrets**:
+Set these in **Cloudflare Dashboard** under **Workers & Pages** > `voidclient-website` > **Settings** > **Variables and Secrets**:
 
 ### Encrypted Secrets (Never commit or expose in client)
 
 | Name | Description | Example / Note |
 | --- | --- | --- |
 | `DATABASE_URL` | Neon pooled PostgreSQL connection string | `postgresql://user:pass@ep-xyz-pooler.region.aws.neon.tech/neondb?sslmode=require` (must include `-pooler`) |
+| `DIRECT_URL` | Direct PostgreSQL connection for migration jobs | Use the non-pooler host for hosted migrations; local PostgreSQL can use the same value as `DATABASE_URL` |
 | `BETTER_AUTH_SECRET` | 32+ char secret for token signing | Generate via `openssl rand -hex 32` |
 | `BETTER_AUTH_URL` | Canonical public origin | `https://voidclient.org` |
 | `STRIPE_SECRET_KEY` | Stripe secret API key | `sk_live_...` (or `sk_test_...`) |
@@ -104,12 +115,12 @@ Set these in **Cloudflare Dashboard** under **Workers & Pages** > `void-website`
 
 | Name | Value | Purpose |
 | --- | --- | --- |
-| `NEXT_PUBLIC_APP_URL` | `https://voidclient.org` | Public origin |
+| `NEXT_PUBLIC_WEBSITE_URL` | `https://voidclient.org` | Public origin |
 | `NEXT_PUBLIC_ACCOUNT_URL` | `https://voidclient.org/account` | Account route origin |
 | `NEXT_PUBLIC_STORE_URL` | `https://voidclient.org/store` | Store route origin |
 | `STORE_CHECKOUT_ENABLED` | `false` | Set `true` only when Stripe live payments are verified |
-| `NEXT_PUBLIC_MICROSOFT_CLIENT_ID` | `<azure-client-id>` | Microsoft OAuth App ID |
-| `NEXT_PUBLIC_DISCORD_CLIENT_ID` | `<discord-client-id>` | Discord OAuth App ID |
+| `MICROSOFT_CLIENT_ID` | `<azure-client-id>` | Microsoft OAuth App ID, read by the server |
+| `DISCORD_CLIENT_ID` | `<discord-client-id>` | Discord OAuth App ID, read by the server |
 
 ---
 
@@ -117,7 +128,7 @@ Set these in **Cloudflare Dashboard** under **Workers & Pages** > `void-website`
 
 To route `voidclient.org` to the Cloudflare Worker:
 
-1. In Cloudflare Dashboard, go to **Workers & Pages** > **void-website** > **Settings** > **Domains & Routes**.
+1. In Cloudflare Dashboard, go to **Workers & Pages** > **voidclient-website** > **Settings** > **Domains & Routes**.
 2. Click **Add** > **Custom Domain**.
 3. Enter `voidclient.org` and click **Add Custom Domain**.
 4. Repeat for `www.voidclient.org` if desired.

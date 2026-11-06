@@ -21,7 +21,15 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: npm run db:generate
+        env:
+          PRISMA_SKIP_POSTINSTALL_GENERATE: 'true'
+      - name: Build the website without a pre-generated Prisma client
+        run: npm run brand:prepare && npm run build --workspace=@void/website
+        env:
+          VOID_LOCAL_PREVIEW: 'true'
+          NEXT_PUBLIC_WEBSITE_URL: http://localhost:3000
+          NEXT_PUBLIC_ACCOUNT_URL: http://localhost:3000/account
+          NEXT_PUBLIC_STORE_URL: http://localhost:3000/store
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test

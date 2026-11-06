@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev -p 3001",
+    "prebuild": "prisma generate --schema ../../backend/prisma/schema.prisma",
     "build": "next build",
     "start": "node ../../scripts/start-app.mjs account",
     "typecheck": "next typegen && tsc --noEmit"
