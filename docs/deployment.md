@@ -6,7 +6,7 @@ These are deployment instructions, not a record of a completed deployment. No ho
 
 ## Recommended Cloudflare Deployment (Single-Origin)
 
-The unified website (`apps/website`) can be hosted directly on Cloudflare using **Cloudflare Workers + OpenNext** (`@opennextjs/cloudflare`), which packages the dynamic Next.js runtime (server components, API routes, Better Auth, Stripe checkout, Prisma database access) into a Worker while serving static assets via Cloudflare's CDN.
+The unified website (`apps/website`) supports the existing Cloudflare Pages Git project through advanced-mode server packaging, as well as **Cloudflare Workers + OpenNext** (`@opennextjs/cloudflare`). For Pages, use `npm run build:pages` and output `apps/website/out`; the existing website workspace build also prepares that artifact automatically when Cloudflare sets `CF_PAGES=1`. See [Pages build recovery and configuration](cloudflare.md#existing-pages-build-failures).
 
 - **Deployment Guide**: [docs/cloudflare.md](cloudflare.md)
 - **Build command**: `npm run build:cloudflare`

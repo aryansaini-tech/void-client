@@ -66,6 +66,8 @@ Technology: Next.js 16.4.6, React 19.3.1, TypeScript, Tailwind, Framer Motion, G
 npm run dev                  # all apps and the backend
 npm run dev:website          # or dev:account, dev:store, dev:backend
 npm run build                # all production builds
+npm run build:pages          # Cloudflare Pages server and assets in apps/website/out
+npm run verify:pages         # checks the Pages artifact in local workerd
 npm run start                # all production servers
 npm run lint
 npm run typecheck

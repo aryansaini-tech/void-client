@@ -1,14 +1,20 @@
-# Cloudflare Workers Deployment with OpenNext
+# Cloudflare Pages and Workers Deployment with OpenNext
 
-This document details the configuration, prerequisites, dashboard settings, and deployment steps for hosting the unified Void Client application (`apps/website`) on Cloudflare using **OpenNext for Cloudflare** (`@opennextjs/cloudflare`) and **Cloudflare Workers with Static Assets**.
+The unified Void Client application (`apps/website`) uses OpenNext's server runtime on Cloudflare. It can deploy through the existing Pages Git project using this repository's advanced-mode packaging, or through a Worker with Static Assets.
 
 ## Existing Pages build failures
 
-A log mentioning `pages_build_output_dir` is a **Pages** deployment. This repository's Wrangler files configure a **Worker**. The OpenNext output cannot be deployed by pointing a Pages project's output directory at `.next` or `.open-next/assets`; the latter contains only assets, not the application server.
+A log ending with `Output directory "apps/website/out" not found` after a successful Next.js build means the Pages project expected an artifact the workspace build did not produce. The workspace `postbuild` now detects `CF_PAGES=1`, adapts the completed Next.js build with OpenNext, and packages its module Worker and static assets into `apps/website/out`.
+
+The root `wrangler.jsonc` now configures Pages with `pages_build_output_dir` and `nodejs_compat`. The existing build command `npm run brand:prepare && npm run build --workspace=@void/website` continues to work. The explicit equivalent is `npm run build:pages`. Pages Git deployment supplies `CF_PAGES_URL`; packaging derives the actual Pages project name from that hostname for the final configuration.
+
+The output includes `_worker.js/index.js`, Wrangler's bundled JS/Wasm modules, `_routes.json`, and the static assets. Dynamic routes execute the same OpenNext server; assets bypass the server through Pages routing. Both `/void/scene.html` and Pages' extensionless `/void/scene` receive the landscape embedding headers. Sensitive application routes retain their normal embedding protection.
+
+Run `npm run verify:pages` after building to verify the actual artifact in local workerd. CI reproduces the supplied Pages build command on Node.js 22.15.0 and runs this verification. OpenNext's upstream deployment command targets Workers; the Pages module packaging is maintained in this repository using [Pages advanced mode](https://developers.cloudflare.com/pages/functions/advanced-mode/).
 
 The old command `npm run brand:prepare && npm run build --workspace=@void/website` also skipped Prisma generation. On a clean install, the client had no schema-specific types, causing the dashboard's `activity.map(event => ...)` to fail with an implicit `any`. Each Next.js app now has a `prebuild` hook that generates the client from `backend/prisma/schema.prisma`. The CI workflow builds the website before any other generation step to cover this exact entry point.
 
-For the full application, connect `main` to a Worker named `voidclient-website` with repository root `/`, build command `npm run build:cloudflare`, and deploy command `npm run deploy:worker --workspace=@void/website`. A Pages project cannot be converted just by changing its build command. If only Pages exists, create the Worker project first and verify its preview before transferring the custom domain. Keep the current Pages deployment available until that check passes.
+For a separate Worker deployment, connect `main` to a Worker named `voidclient-website` with repository root `/`, build command `npm run build:cloudflare`, and deploy command `npm run deploy:worker --workspace=@void/website`. Its configuration remains in `apps/website/wrangler.jsonc`; root-level Wrangler Worker commands must explicitly use `--config wrangler.worker.jsonc`.
 
 Cloudflare documents [OpenNext on Workers](https://developers.cloudflare.com/workers/framework-guides/web-apps/opennext/). This project retains its existing OpenNext integration.
 
@@ -22,8 +28,8 @@ Void Client uses a single-origin Next.js architecture hosted on `https://voidcli
 - `/account` & `/account/*` — User authentication, profile, settings, Microsoft/Discord OAuth integration.
 - `/api/*` — Route handlers for Better Auth (`/api/auth/*`), cart management, checkout sessions, order retrieval, and Stripe webhooks.
 
-### Why Legacy Cloudflare Pages (Static Export) Is Incompatible
-Previous deployments used static export (`output: 'export'`), outputting HTML files to an `out/` folder. With dynamic Better Auth authentication, server-side Stripe checkout sessions, and Prisma database connectivity, static export is no longer viable. Cloudflare Pages cannot execute dynamic Node.js / Edge route handlers without a server adapter.
+### Why the Pages server artifact is required
+The account, checkout, and API routes require the server adapter. The Pages `out` folder produced by this repository includes that server in advanced mode. Uploading `.next` or `.open-next/assets` alone omits it. Next.js static export does not support these dynamic routes.
 
 ### The OpenNext Solution
 We use `@opennextjs/cloudflare` alongside `wrangler`:
@@ -50,6 +56,16 @@ We use `@opennextjs/cloudflare` alongside `wrangler`:
 ---
 
 ## 3. Cloudflare Dashboard Settings
+
+### Existing Pages Git project
+
+- Repository root: `/`
+- Production branch: `main`
+- Build command: `npm run brand:prepare && npm run build --workspace=@void/website` or `npm run build:pages`
+- Output directory: `apps/website/out`, also set in the root Wrangler configuration
+- Compatibility flag: `nodejs_compat`, supplied by that configuration
+
+Retry the deployment with the latest `main`. The Pages project and its existing domains can stay in place. Configure runtime service variables and secrets in the Pages project settings; the same service prerequisites described below apply.
 
 ### Option A: Cloudflare Workers CI / Git Integration (Recommended)
 

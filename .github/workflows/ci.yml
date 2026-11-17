@@ -1,6 +1,27 @@
 name: Verify Void
 on: [push, pull_request]
 jobs:
+  pages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.15.0
+          cache: npm
+      - run: npm ci
+        env:
+          PRISMA_SKIP_POSTINSTALL_GENERATE: 'true'
+      - name: Reproduce the Pages Git build command
+        run: npm run brand:prepare && npm run build --workspace=@void/website
+        env:
+          CF_PAGES: '1'
+          CF_PAGES_URL: https://preview.voidclient-website.pages.dev
+          VOID_LOCAL_PREVIEW: 'false'
+          NEXT_PUBLIC_WEBSITE_URL: https://voidclient.org
+          NEXT_PUBLIC_ACCOUNT_URL: https://voidclient.org/account
+          NEXT_PUBLIC_STORE_URL: https://voidclient.org/store
+      - run: npm run verify:pages
   verify:
     runs-on: ubuntu-latest
     services:

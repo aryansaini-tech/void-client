@@ -1,14 +1,9 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "voidclient-website",
-  "main": "apps/website/.open-next/worker.js",
+  "pages_build_output_dir": "apps/website/out",
   "compatibility_date": "2026-03-01",
   "compatibility_flags": [
     "nodejs_compat"
-  ],
-  "assets": {
-    "directory": "apps/website/.open-next/assets",
-    "binding": "ASSETS"
-  },
-  "previews": {}
+  ]
 }

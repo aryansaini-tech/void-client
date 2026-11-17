@@ -1,5 +1,15 @@
 # Verification report: Void cinematic release
 
+## Pages deployment recovery: 18 November 2026
+
+The deployment log for commit `0905399` showed a successful Next.js build followed by a missing `apps/website/out` directory. The Pages build now packages the OpenNext server and static assets into that directory, and the root Wrangler configuration supplies `pages_build_output_dir` and `nodejs_compat`.
+
+The exact supplied command, `npm run brand:prepare && npm run build --workspace=@void/website`, passed locally with `CF_PAGES=1`, production public URLs, and no database or auth credentials. Next.js compilation, TypeScript checks, page generation, OpenNext adaptation, and Wrangler's minified module bundle all completed successfully.
+
+`npm run verify:pages` passed **28 checks**, with **50 referenced assets** resolving through the actual Pages artifact in local workerd. It covered public and integrated account/store routes, security headers, both cinematic scene URLs after Pages redirects, compressed geometry, unchanged logo bytes, the unconfigured cart API's structured 503 response, rejection of an untrusted-origin mutation, and the generated social image. Lint for both new build/verification scripts and `git diff --check` passed.
+
+CI now reproduces the supplied build command on Linux with Node.js 22.15.0 and runs the Pages runtime checks. That new CI job has not yet been observed remotely. This follow-up used the existing Windows dependencies; it does not claim another clean install, a repeat of the full browser suite, configured provider transactions, or a successful remote deployment. The earlier release results below remain historical evidence for application behavior.
+
 Verified on **17 November 2026 (Asia/Kolkata)** in the supplied Windows workspace with Node.js 24.19.0, production Next.js servers, desktop Chromium, mobile Chromium, mobile WebKit, and the disposable local PostgreSQL database. The cinematic design is integrated across the website, account, and store. Start the local preview at `http://localhost:3000` with `npm run dev:website`.
 
 ## Current release checks
@@ -57,7 +67,7 @@ In a separate source copy with freshly installed dependencies and Prisma's defau
 
 Lint, the full monorepo/test TypeScript check, and all 23 unit tests passed again. The production `npm run build:cloudflare` also passed, including Next.js compilation, strict TypeScript checks, page generation, and the final OpenNext Worker bundle. CI now explicitly skips automatic Prisma generation during installation and builds the website before any other generation step, making the missing-client case part of the normal workflow. The application behavior is unchanged; the full integration, HTTP, and browser results below are from the preceding redesign verification.
 
-The supplied log is still from Cloudflare **Pages**. The OpenNext artifact targets **Workers**. A repository build fix does not change that external project type; see [the Cloudflare setup and troubleshooting instructions](cloudflare.md#existing-pages-build-failures).
+At that time, the OpenNext artifact targeted **Workers** and the supplied log came from **Pages**. The 18 November follow-up above adds Pages advanced-mode packaging; see [the Cloudflare setup and troubleshooting instructions](cloudflare.md#existing-pages-build-failures).
 
 ## Redesign verification results
 
@@ -128,4 +138,4 @@ For configured HTTP tests, run the production servers on ports 3000–3002 with 
 
 The browser checks use emulated desktop/mobile layouts, not physical phones. No measured FPS, Lighthouse score, real Microsoft/Discord exchange, Stripe-hosted payment, external email delivery, Docker image build, or production hosting validation is claimed. Provider security paths were tested with local fixtures; live credentials were unavailable. Test identities and products are explicitly synthetic and cleaned up by their tests.
 
-The integrated website now requires a server runtime; static Cloudflare Pages `out` hosting cannot serve the account/store APIs. See [single-origin implementation and future hosting requirements](single-origin.md). No hosting settings, provider registrations, webhook endpoints, DNS, or production deployment were changed.
+The integrated website requires a server runtime; its Pages `out` artifact now includes the server in advanced mode. Assets alone cannot serve the account/store APIs. See [single-origin implementation and future hosting requirements](single-origin.md). No hosting settings, provider registrations, webhook endpoints, DNS, or production deployment were changed locally.
