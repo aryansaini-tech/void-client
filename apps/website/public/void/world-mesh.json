@@ -1,0 +1,11 @@
+{
+  "sourceHash": "f95b5cc395012e7853d9fec59ee688d78b818043a0b117a0561377c10cb34ca9",
+  "sha256": "fb099008676e9ef4546f1d32382136b5dc3f2d6efb0b7a6d6d43fce1f42fc84b",
+  "runtimeSha256": "8ef135a572cd9133a8fcb2437a109e8f6dfc0868df16dbcde6316e87cdc2a0cf",
+  "rawBytes": 50930116,
+  "compressedBytes": 6297452,
+  "meshes": 117,
+  "geometries": 114,
+  "trees": 433,
+  "leafBlocks": 31988
+}

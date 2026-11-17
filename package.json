@@ -13,6 +13,8 @@
   },
   "scripts": {
     "brand:prepare": "node scripts/prepare-brand.mjs",
+    "cinematic:prepare": "node scripts/prepare-cinematic.mjs",
+    "verify:cinematic": "playwright test tests/e2e/cinematic.spec.ts",
     "setup": "npm install && npm run db:generate",
     "dev": "node scripts/workspaces.mjs dev",
     "dev:website": "npm run dev --workspace=@void/website",
@@ -39,19 +41,25 @@
     "test:http": "node --import ./scripts/register-typescript.mjs --test --test-isolation=none tests/smoke/*.test.ts"
   },
   "devDependencies": {
-    "@opennextjs/cloudflare": "1.20.15",
+    "@opennextjs/cloudflare": "1.20.17",
     "@playwright/test": "^1.56.1",
     "@types/node": "^22.20.1",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
     "eslint": "9.39.5",
-    "eslint-config-next": "16.4.4",
+    "eslint-config-next": "16.4.6",
     "prisma": "6.19.3",
     "sharp": "0.35.5",
     "tsx": "^4.20.6",
     "typescript": "5.9.3",
-    "typescript-eslint": "^8.46.0",
-    "wrangler": "4.148.0",
-    "zod": "3.25.76"
+    "typescript-eslint": "8.73.0",
+    "wrangler": "4.164.0",
+    "zod": "4.6.7"
+  },
+  "overrides": {
+    "deepmerge-ts": "8.0.2",
+    "@opennextjs/cloudflare": {
+      "glob": "14.0.6"
+    }
   }
 }

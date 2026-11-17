@@ -10,7 +10,7 @@
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   width: min(100%, 1120px);
   min-width: 0;
-  gap: 70px;
+  gap: 38px;
 }
 
 .art {
@@ -18,9 +18,13 @@
   flex-direction: column;
   justify-content: center;
   min-width: 0;
-  padding: 32px 0;
+  padding: 40px 32px;
   overflow: hidden;
-  background: radial-gradient(ellipse at 40% 50%, rgb(var(--gold-rgb) / .035), transparent 65%);
+  border: 1px solid #ffffffa6;
+  border-radius: 27px;
+  color: #f0eee6;
+  background: linear-gradient(0deg, #102c26db, #102c2633), url('/void/landscapes/river-grove.webp') center / cover;
+  box-shadow: var(--shadow-card);
 }
 
 .artCopy,
@@ -46,17 +50,21 @@
 }
 
 .scene > svg { display: block; position: absolute; inset: 0; }
-.caption { font-size: 13px; line-height: 1.85; }
+.art .scene { border-radius: 0; background: transparent; box-shadow: none; }
+.art .scene > :global(img) { display: none; }
+.art .scene :global(.scene-atmosphere) { display: none; }
+.art .scene :global(.scene-brand) { width: 100px; }
+.caption { color: #e2e7d8; font-size: 13px; line-height: 1.85; }
 
 .formSide {
   display: grid;
   place-items: center;
   min-width: 0;
   padding: 36px clamp(28px, 3vw, 45px);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  background: var(--surface);
-  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border-glass);
+  border-radius: 27px;
+  background: var(--glass-frosted);
+  box-shadow: inset 0 1px 0 #fff9, var(--shadow-card);
 }
 
 @media (prefers-reduced-motion: no-preference) {

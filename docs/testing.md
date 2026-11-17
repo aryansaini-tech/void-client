@@ -1,4 +1,51 @@
-# Verification report: Void redesign and recovery
+# Verification report: Void cinematic release
+
+Verified on **17 November 2026 (Asia/Kolkata)** in the supplied Windows workspace with Node.js 24.19.0, production Next.js servers, desktop Chromium, mobile Chromium, mobile WebKit, and the disposable local PostgreSQL database. The cinematic design is integrated across the website, account, and store. Start the local preview at `http://localhost:3000` with `npm run dev:website`.
+
+## Current release checks
+
+| Check | Executed result |
+| --- | --- |
+| Production builds | Website, account, store, and backend passed after the final menu and cloth fixes |
+| Cloudflare build | Production public URLs; Next.js 16.4.6, OpenNext 1.20.17, and the Worker bundle passed |
+| TypeScript | Full monorepo typecheck passed; test TypeScript compilation also passed after the browser fixes |
+| Lint | Passed without warnings after the application fixes |
+| Unit tests | **23 passed, 0 failed** |
+| PostgreSQL integration | **19 passed, 0 failed**, including actual local SMTP delivery |
+| Production HTTP checks | **38 passed, 0 failed**, including authenticated account/cart operations and the cinematic document's embedding headers |
+| Final browser coverage | Full 90-combination run followed by **7 passed, 0 failed, 2 intentional skips** for the corrected fixtures; see the run history below |
+| Asset regeneration | `npm run cinematic:prepare` passed; production builds use the included assets without the reference folder |
+| Live dependency audit | **0 vulnerabilities**, with the final report saved locally at `.cache/final-audit.json` |
+| Whitespace | `git diff --check` passed |
+
+## Browser findings and corrections
+
+The initial **90-combination** run produced 73 passes, 15 intentional duplicate/engine skips, and two desktop failures. Both failures were corrected in application code:
+
+- The mobile navigation's initial route effect could close a menu opened by a replayed first tap during hydration. It now closes the menu only when the pathname changes. Route navigation, Escape, outside clicks, focus restoration, and desktop resizing retain their existing behavior.
+- The desktop cloth renderer's 48px bleed could expand the document after resizing to a phone width. The surface now contains that overflow, and a live viewport/pointer subscription releases the simulation on narrow layouts. Returning to desktop initializes it again. The cloth check now exercises this round trip and reduced-motion cleanup.
+
+The earlier follow-up **36-combination** run finished with **33 passes, zero failures, and three intentional engine/duplicate skips**. It covered the affected interactions in all three browser projects: nine camera chapters, cloth resizing and cleanup, public routes/assets, mobile menu controls, logo/reveal behavior, shared navigation, mobile branding, rapid scrolling, no-JavaScript content, and theme persistence.
+
+Finalization repeated the complete **90-combination** suite against fresh production builds. It completed with **73 passes, 15 intentional duplicate/engine skips, and two WebKit fixture failures**. The direct-route fixture collected cancelled prefetch errors during document replacement; each route now owns a separate page and asserts its errors before closing that document. The mobile reveal fixture now scrolls the last stacked landscape card into view before checking its opacity and unchanged section geometry. The configured dashboard capture also waits for its heading to render after sign-in.
+
+The final **9-combination** rerun covered all three corrected fixtures across all browser projects and finished with **7 passes, zero failures, and two intentional duplicate skips**. Page-error, hydration, asset-response, metadata, geometry, and opacity assertions remain in place. Test lint and TypeScript checks passed after these corrections. The full suite was not repeated after these fixture-only changes. The full-run report is retained locally at `.cache/cinematic-final-full-report.html`; the final rerun report and captures are in `.cache/cinematic-signoff-report/` and `.cache/cinematic-signoff-results/`.
+
+An initial concurrent HTTP/browser finalization attempt hit timeouts and was stopped. Sequential HTTP verification passed all **38 checks**, and the complete browser rerun used `--timeout=180000` on this Windows host. Application builds, full typecheck, lint, all 23 unit tests, all 19 integration tests, and the live zero-vulnerability audit passed again during finalization.
+
+Desktop and mobile homepage captures, the configured account dashboard and cart, and the final mobile website/account/store captures were visually inspected. Reduced motion freezes ambient WebGL effects while retaining on-demand camera viewpoints. Software WebGL verifies behavior and cleanup; it does not measure physical-device FPS.
+
+## Configuration and reproduction
+
+Use the build/test commands below with the documented disposable database. Keep Prisma generation/builds separate from tests and running production servers on Windows because the native query engine can be locked while in use.
+
+The browser config defaults to Playwright's installed Chromium, including in CI. On this Windows host the run explicitly used `VOID_E2E_CHROMIUM_CHANNEL=chrome` and `npm run test:e2e -- --timeout=180000`. Set that variable to use installed Chrome; otherwise omit it. The targeted cinematic checks are also available as `npm run verify:cinematic`.
+
+The verified configuration is local. Production launch still requires the actual service credentials and infrastructure, approved legal/product/fulfillment information, and verified release/download content described in [the README](../README.md#content-and-launch-requirements). Microsoft/Discord exchanges, Stripe-hosted payments, external mail delivery, DNS changes, and production deployment were not performed. The Worker artifact is prepared for the documented [Cloudflare deployment](cloudflare.md).
+
+## Historical verification: 6 November 2026
+
+The following report retains the earlier redesign/recovery evidence. Its counts and dates are historical; the current results are above.
 
 Verified on **6 November 2026 (Asia/Kolkata)** in the supplied Windows workspace with Node.js 24.19.0, npm 12.2.0, production Next.js servers, and the disposable local PostgreSQL database. The redesign was recovered from the existing working tree; repository screenshots and source files supplied the design context. This replaces the 5 November results. No production database operation, provider transaction, external email, or DNS change was performed.
 

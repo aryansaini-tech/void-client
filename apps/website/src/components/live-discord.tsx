@@ -10,7 +10,7 @@ export function LiveDiscordButton() {
 
   if (url) {
     return (
-      <ButtonLink href={url} external>
+      <ButtonLink href={url} external variant="secondary">
         <DiscordIcon width={18} height={18} /> Join our Discord
       </ButtonLink>
     );

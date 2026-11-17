@@ -36,6 +36,12 @@ Connect real fulfillment before selling. The database's payment and fulfillment 
 
 ## Response headers and practical limits
 
-The apps set a restrictive CSP, frame denial, MIME-sniffing protection, referrer policy, permissions policy and production HSTS. The CSP permits inline scripts/styles needed by this App Router configuration; it is not a nonce-based strict CSP. If introducing third-party embeds or remote image hosts, review both CSP and Next image allowlists. No third-party analytics/tracking is installed.
+The apps set a restrictive CSP, frame denial, MIME-sniffing protection, referrer policy, permissions policy and production HSTS. The website permits same-origin frame sources for its decorative world, while application pages retain `frame-ancestors 'none'` and `X-Frame-Options: DENY`. Only `/void/scene.html` permits same-origin embedding, with a separate CSP and `X-Frame-Options: SAMEORIGIN`. Both the Next.js server and Cloudflare static headers enforce that exception. The CSP permits inline scripts/styles needed by this App Router configuration; it is not a nonce-based strict CSP. If introducing third-party embeds or remote image hosts, review both CSP and Next image allowlists. No third-party analytics/tracking is installed.
+
+## Dependency maintenance, 17 November 2026
+
+The final live npm audit reports zero vulnerabilities. Next.js and its ESLint config are pinned to 16.4.6, Zod to 4.6.7, Nodemailer to 10.6.0, and the Hono Node adapter to 2.1.9. The Zod migration preserves the existing bounded request parser, strict schemas, cart limits, and field validation; record schemas now declare their string keys explicitly. Local SMTP and authentication integration tests verify the mail update.
+
+OpenNext 1.20.17, Wrangler 4.164.0, and typescript-eslint 8.73.0 update the build tooling. Two overrides address remaining transitive advisories: `deepmerge-ts` 8.0.2 for Prisma configuration, and `glob` 14.0.6 scoped to OpenNext's Cloudflare adapter. Prisma remains on 6.19.3. Client generation, all application builds, and the Cloudflare Worker build validate this dependency tree. Review the overrides against upstream releases when updating these packages.
 
 Automated tests are not a penetration test. Before public launch, review proxy headers, DNS/cookie scope, production email delivery, dependency advisories, refund/fulfillment policy, provider webhooks, database backups and monitoring in the actual hosting environment.

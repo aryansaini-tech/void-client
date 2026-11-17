@@ -75,7 +75,10 @@ export function MotionRoot({ children }: { children: ReactNode }) {
         const direction = element.dataset.reveal;
         const from = mobile ? '0 12px' : direction === 'left' ? '-16px 0' : direction === 'right' ? '16px 0' : direction === 'heading' ? '0 10px' : '0 18px';
         // WAAPI doesn't mutate React-owned attributes during streamed hydration.
-        const animation = element.animate([{ opacity: 0, translate: from }, { opacity: 1, translate: '0 0' }], {
+        const keyframes = direction === 'heading'
+          ? [{ opacity: 0, translate: from, clipPath: 'inset(0 0 70% 0)' }, { opacity: 1, translate: '0 0', clipPath: 'inset(0 0 0 0)' }]
+          : [{ opacity: 0, translate: from }, { opacity: 1, translate: '0 0' }];
+        const animation = element.animate(keyframes, {
           duration: mobile ? 320 : 480,
           easing: 'cubic-bezier(.22, 1, .36, 1)',
         });

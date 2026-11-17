@@ -23,3 +23,6 @@ backend/prisma/.env
 # Root-level audit screenshots & raw font package (website uses apps/website/public/fonts/Monocraft.otf)
 /*.png
 Monocraft-otf/
+
+# Supplied design reference; production assets are tracked under apps/*/public/void.
+/website/

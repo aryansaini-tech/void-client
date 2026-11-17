@@ -1,0 +1,16 @@
+{
+  "reference": "website/website",
+  "sourceSha256": "2a30a8ab5b6d39fd59cac463eef3c353f43f293a0c3ccf908c5a5bf86aee4b5a",
+  "chapters": 9,
+  "preserved": [
+    "world geometry",
+    "water/sky/foliage shaders",
+    "post passes",
+    "Catmull-Rom interpolation",
+    "adaptive resolution",
+    "reflection cache",
+    "cloth equations"
+  ],
+  "runtimeBytes": 23167,
+  "clothBytes": 23028
+}

@@ -46,13 +46,13 @@ export default function AboutPage() {
         <section className="identity-strip" aria-label="Void visual identity">
           <div>
             <Wordmark />
-            <p className="field-hint" style={{ marginTop: 14 }}>Obsidian dark. Metallic gold. Room to breathe.</p>
+            <p className="field-hint" style={{ marginTop: 14 }}>Champagne. Forest light. A world of possibility.</p>
           </div>
-          <div className="identity-colors" aria-label="Obsidian, metallic gold, champagne gold, and deep charcoal">
-            <span style={{ background: 'var(--background)' }} />
-            <span style={{ background: 'var(--gold)' }} />
-            <span style={{ background: 'var(--gold-bright)' }} />
-            <span style={{ background: 'var(--text)' }} />
+          <div className="identity-colors" aria-label="Champagne, forest green, atmospheric blue grey, and warm ivory">
+            <span style={{ background: 'var(--champagne)' }} />
+            <span style={{ background: 'var(--forest)' }} />
+            <span style={{ background: 'var(--sky)' }} />
+            <span style={{ background: 'var(--ivory)' }} />
           </div>
         </section>
         <div className="community-banner">

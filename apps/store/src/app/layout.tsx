@@ -8,6 +8,8 @@ import { StoreProvider } from '../components/store-provider';
 import './globals.css';
 import '@void/design-system/styles.css';
 import '@void/design-system/polish.css';
+import '@void/design-system/cinematic.css';
+import { Atmosphere } from '@void/ui/scene';
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.urls.store),
@@ -17,17 +19,18 @@ export const metadata: Metadata = {
   twitter: { card: 'summary_large_image' },
 };
 
-export const viewport: Viewport = { themeColor: '#08090b', width: 'device-width', initialScale: 1 };
+export const viewport: Viewport = { themeColor: '#dac8ad', width: 'device-width', initialScale: 1 };
 export const dynamic = 'force-dynamic';
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" data-theme="dark" suppressHydrationWarning>
-      <head><link rel="preload" href="/fonts/Monocraft.otf" as="font" type="font/otf" crossOrigin="anonymous" /><AppearanceScript /></head>
+    <html lang="en" data-theme="light" suppressHydrationWarning>
+      <head><link rel="preload" href="/void/fonts/Monocraft.ttf" as="font" type="font/ttf" crossOrigin="anonymous" /><AppearanceScript /></head>
       <body>
         <MotionRoot>
           <StoreProvider>
             <Navigation app="store" />
+            <Atmosphere variant="light" />
             {children}
             <Footer app="store" />
           </StoreProvider>

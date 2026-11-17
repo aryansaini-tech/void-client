@@ -27,7 +27,7 @@ test('built applications serve every public page, metadata and referenced local 
         assert.doesNotMatch(html, /Application error: a (?:client|server)-side exception/);
         for (const match of html.matchAll(/(?:src|href)="([^"<>]+)"/g)) {
           const value = match[1]?.replaceAll('&amp;', '&');
-          if (value?.startsWith('/') && /\.(css|js|svg|woff2|png|webp|avif)(?:\?|$)|^\/_next\/image\?/.test(value)) assets.add(new URL(value, origin).href);
+          if (value?.startsWith('/') && /\.(css|js|svg|woff2|ttf|png|webp|avif)(?:\?|$)|^\/_next\/image\?/.test(value)) assets.add(new URL(value, origin).href);
         }
       });
     }
@@ -36,6 +36,20 @@ test('built applications serve every public page, metadata and referenced local 
     assert.ok(assets.size > 10);
     for (const url of assets) assert.equal((await fetch(url)).status, 200, url);
   });
+});
+
+test('the cinematic document allows same-origin embedding and serves its runtime assets', async () => {
+  const origin = 'http://localhost:3000';
+  const response = await fetch(`${origin}/void/scene.html`);
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get('x-frame-options'), 'SAMEORIGIN');
+  assert.match(response.headers.get('content-security-policy') ?? '', /frame-ancestors 'self'/);
+  const html = await response.text();
+  const scripts = [...html.matchAll(/<script src="([^"]+)"/g)].map(match => match[1]);
+  assert.ok(scripts.length >= 5);
+  for (const asset of [...scripts, '/void/world-mesh.bin.gz', '/void/fonts/Monocraft.ttf']) {
+    assert.equal((await fetch(origin + asset)).status, 200, asset);
+  }
 });
 
 test('private routes, direct links and unknown products enforce real boundaries', { timeout: 60_000 }, async () => {

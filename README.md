@@ -2,11 +2,11 @@
 
 **PLAY BEYOND LIMITS.**
 
-An original black-and-gold Minecraft Bedrock ecosystem: an editorial product website, a secure account portal, and a store with server-priced Stripe Checkout. The website serves `/store` and `/account` by importing the existing app routes and services. The standalone account and store builds remain available.
+A cinematic Minecraft Bedrock ecosystem: a live river valley, nine scroll camera chapters, Champagne glass surfaces, licensed Monocraft branding, a secure account portal, and a store with server-priced Stripe Checkout. The website serves `/store` and `/account` by importing the existing app routes and services. The standalone account and store builds remain available.
 
-The repository root is the `void-client` monorepo. It was created from an empty workspace. No Flarial code, templates, WordPress themes, or third-party component source was copied.
+The repository root is the existing `void-client` monorepo. The supplied reference's renderer, world assets, and cloth equations are adapted and attributed in `apps/website/public/void/CREDITS.txt`.
 
-The redesign preserves this ecosystem and the supplied official logos, with a charcoal palette, restrained champagne accents, open editorial layouts, and responsive account/store screens. The default is dark; saved light and reduced-motion preferences remain supported. See [the current art direction](docs/premium-art-direction.md), [verification results](docs/testing.md), and [Microsoft configuration](docs/microsoft-login.md).
+The redesign adapts the supplied `website/website` reference into the existing applications. It retains the official logos, authentication, APIs, cart and checkout, with a shared landscape and glass design across every route. Champagne is the default; saved dark and reduced-motion preferences remain supported. See [the cinematic implementation and reference audit](docs/cinematic-transformation.md), [verification](docs/testing.md), and [Microsoft configuration](docs/microsoft-login.md).
 
 ## Start locally
 
@@ -58,7 +58,7 @@ docs/                      Architecture, setup, content, security, deployment, Q
 - **Store:** Homepage, collection, categories, category/product detail routes, search, persistent guest and account carts, checkout, order confirmation/status and purchase history. Account carts use revision checks; stale updates are rejected. Stripe receives product Price IDs from the server. Signed webhooks record payments transactionally and deduplicate events.
 - **Motion:** Browser-native reveals, preview crossfades, gold shine, restrained magnetic controls, lightweight scroll-linked artwork, and route transitions. Scrolling stays native; content remains readable with reduced motion or JavaScript disabled. See [the UI repair notes](docs/ui-polish.md) and [the integration notes](docs/single-origin.md).
 
-Technology: Next.js 16.4.4, React 19.3.1, TypeScript, Tailwind, Framer Motion, GSAP, Lucide, Prisma 6.19.3, PostgreSQL, Better Auth 1.7.15, Hono, Nodemailer and Stripe. Manrope is self-hosted; no runtime font CDN is needed. See [architecture](docs/architecture.md).
+Technology: Next.js 16.4.6, React 19.3.1, TypeScript, Tailwind, Framer Motion, GSAP, Lucide, Prisma 6.19.3, PostgreSQL, Better Auth 1.7.15, Hono, Nodemailer and Stripe. Manrope and Monocraft are self-hosted; no runtime font CDN is needed. See [architecture](docs/architecture.md).
 
 ## Commands
 
@@ -79,6 +79,8 @@ npm run db:migrate            # author a new development migration
 npm run db:seed               # editorial drafts only
 npm run check:config          # readiness without printing secrets
 npm run brand:prepare         # distribute the supplied logos and derived artwork
+npm run cinematic:prepare     # regenerate world assets from the supplied local reference
+npm run verify:cinematic      # targeted camera, fallback, motion and cloth checks
 ```
 
 See [the testing report](docs/testing.md) for actual results and environment limitations. The report distinguishes executed checks from tests requiring provider credentials or real devices.

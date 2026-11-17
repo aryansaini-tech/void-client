@@ -10,7 +10,7 @@ export function assertOrigin(request: Request, expected: string) {
   const site = request.headers.get('sec-fetch-site');
   if (site === 'cross-site') throw new HttpError(403,'Cross-site requests are not accepted.','INVALID_ORIGIN');
 }
-export async function readJson<T extends z.ZodTypeAny>(request: Request, schema: T): Promise<z.infer<T>> {
+export async function readJson<T extends z.ZodType>(request: Request, schema: T): Promise<z.infer<T>> {
   if (!request.headers.get('content-type')?.startsWith('application/json')) throw new HttpError(415,'Send JSON data.');
   if (Number(request.headers.get('content-length') ?? 0) > 16384) throw new HttpError(413,'Request is too large.');
   const reader = request.body?.getReader(); if (!reader) throw new HttpError(400,'Request body is required.');

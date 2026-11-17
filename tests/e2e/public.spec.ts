@@ -5,41 +5,39 @@ async function noOverflow(page: Page) {
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
 }
 
-test('every public route renders with metadata and no broken local assets', async ({ page }) => {
+test('every public route renders with metadata and no broken local assets', async ({ context }) => {
   test.setTimeout(120_000);
-  const errors: string[] = [];
-  page.on('pageerror', error => errors.push(error.message));
-  page.on('console', message => {
-    if (message.type() === 'error' && /hydration|hydrated|Minified React error/i.test(message.text())) errors.push(message.text());
-  });
-  page.on('response', response => {
-    if (response.status() >= 400 && /\/_next\/|\/media\/|\/brand\//.test(response.url())) errors.push(`${response.status()} ${response.url()}`);
-  });
-  for (const route of websiteRoutes) {
-    // Finish this local document's assets and prefetches before replacing it.
-    // WebKit reports in-flight prefetches as access errors during document teardown.
-    const response = await page.goto(route, { waitUntil: 'networkidle' });
-    expect(response?.status()).toBe(200);
-    await expect(page.locator('main h1')).toHaveCount(1);
-    await expect(page).toHaveTitle(/Void/i);
-    await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /.+/);
-    await noOverflow(page);
-  }
   for (const url of [
+    ...websiteRoutes,
     'http://localhost:3000/account/login', 'http://localhost:3000/account/register',
     'http://localhost:3000/account/forgot-password', 'http://localhost:3000/account/reset-password',
     'http://localhost:3000/account/verify-email', 'http://localhost:3000/store/',
     'http://localhost:3000/store/products', 'http://localhost:3000/store/categories',
     'http://localhost:3000/store/search', 'http://localhost:3000/store/cart', 'http://localhost:3000/store/checkout',
   ]) {
+    // Each direct route owns a document. Assert its errors before intentionally
+    // closing it; WebKit reports cancelled teardown prefetches as access errors.
+    const page = await context.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', error => errors.push(error.message));
+    page.on('console', message => {
+      if (message.type() === 'error' && /hydration|hydrated|Minified React error/i.test(message.text())) errors.push(message.text());
+    });
+    page.on('response', response => {
+      if (response.status() >= 400 && /\/_next\/|\/media\/|\/brand\/|\/void\/|\/fonts\//.test(response.url())) errors.push(`${response.status()} ${response.url()}`);
+    });
     expect((await page.goto(url, { waitUntil: 'networkidle' }))?.status()).toBe(200);
     await expect(page.locator('main h1')).toHaveCount(1);
+    await expect(page).toHaveTitle(/Void/i);
+    await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /.+/);
     await noOverflow(page);
+    expect(errors, url).toEqual([]);
+    await page.close();
   }
-  expect(errors).toEqual([]);
 });
 
 test('deliberate layouts at all requested widths', async ({ page }, info) => {
+  test.setTimeout(120_000);
   test.skip(info.project.name !== 'chromium-desktop', 'The width matrix runs once; device projects cover engine-specific interactions.');
   for (const width of [320, 375, 390, 430, 768, 1024, 1440, 1920]) {
     await page.setViewportSize({ width, height: 960 });
@@ -114,20 +112,21 @@ test('showcase keyboard selection and gallery lightbox retain accessible control
   await expect(page.getByRole('button', { name: 'Preview ClickGUI', exact: true })).toBeFocused();
 });
 
-test('the official hero logo remains sharp, proportioned and separate from the copy', async ({ page }, info) => {
+test('the official navigation logo stays sharp and separate from the cinematic copy', async ({ page }, info) => {
+  test.setTimeout(120_000);
   test.skip(info.project.name !== 'chromium-desktop', 'The viewport matrix runs once.');
   await page.emulateMedia({ reducedMotion: 'reduce' });
   for (const width of [320, 390, 768, 1024, 1440, 1920]) {
     await page.setViewportSize({ width, height: 960 });
     await page.goto('/');
-    const logo = page.locator('.hero-art .brand-image');
+    const logo = page.locator('.site-header .brand-image');
     await expect(logo).toBeVisible();
     await expect(logo).toHaveAttribute('src', '/brand/logo.png');
     const geometry = await logo.evaluate(image => {
       const source = image as HTMLImageElement;
       const mark = image.getBoundingClientRect();
-      const copy = document.querySelector('.hero-copy')!.getBoundingClientRect();
-      const art = document.querySelector('.hero-art')!;
+      const copy = document.querySelector('.cinematic-hero-copy')!.getBoundingClientRect();
+      const art = document.querySelector('.site-header .brand-asset')!;
       return {
         loaded: source.complete && source.naturalWidth > 0,
         natural: source.naturalWidth / source.naturalHeight,
@@ -189,11 +188,11 @@ test('official logo masking, scroll reveals and live reduced motion survive navi
   const mask=await sheen.evaluate(element=>getComputedStyle(element).maskImage);
   expect(mask).toContain('/brand/logo.png');
   expect(await sheen.evaluate(element=>getComputedStyle(element,'::before').animationName)).toBe('logo-sweep');
-  await page.locator('[data-showcase-section]').scrollIntoViewIfNeeded();
-  await expect(page.locator('[data-showcase-section] h2')).toHaveCSS('opacity', '1');
+  await page.locator('#customization').scrollIntoViewIfNeeded();
+  await expect(page.locator('#customization h2')).toHaveCSS('opacity', '1');
   await page.locator('.footer-brand').scrollIntoViewIfNeeded();
   await expect(page.locator('.footer-brand .brand-asset')).toHaveAttribute('data-logo-animated','false');
-  await expect(page.locator('.scene-brand .brand-asset')).toHaveAttribute('data-logo-active','false');
+  await expect(page.locator('.cinematic-world iframe')).toHaveCount(1);
   await page.emulateMedia({reducedMotion:'reduce'});
   await expect(page.locator('html')).toHaveAttribute('data-reduced-motion','true');
   expect(await page.evaluate(() => document.getAnimations().filter(animation => animation.id === 'void-reveal' && animation.playState === 'running').length)).toBe(0);

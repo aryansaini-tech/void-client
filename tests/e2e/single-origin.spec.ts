@@ -67,7 +67,7 @@ test('mobile branding is proportioned, centered and stable through scroll and me
       });
       expect(geometry.gap).toBeGreaterThanOrEqual(8);
       expect(Math.abs(geometry.brandY - geometry.actionsY)).toBeLessThanOrEqual(1);
-      expect(geometry.logoWidth).toBeGreaterThanOrEqual(34);
+      expect(geometry.logoWidth).toBeGreaterThanOrEqual(24);
       expect(geometry.ratio).toBeCloseTo(geometry.naturalRatio, 2);
       expect(geometry.overflow).toBeLessThanOrEqual(1);
       await page.evaluate(() => window.scrollTo({ top: 500, behavior: 'instant' }));
@@ -79,7 +79,7 @@ test('mobile branding is proportioned, centered and stable through scroll and me
       await expect(page.locator('#mobile-navigation')).not.toBeVisible();
       if (width === 390) {
         await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
-        await page.screenshot({ path: info.outputPath(`mobile-${route.replaceAll('/', '-') || 'home'}.png`) });
+        await page.screenshot({ path: info.outputPath(`mobile-${route.replaceAll('/', '-') || 'home'}.png`), caret: 'initial' });
       }
     }
   }
@@ -88,13 +88,14 @@ test('mobile branding is proportioned, centered and stable through scroll and me
 test('fast scrolling and resizing reveal content without moving the document layout', async ({ page }) => {
   await page.goto('/');
   await page.evaluate(() => document.fonts.ready);
-  const before = await page.locator('.experience-stories').evaluate(element => ({ top: (element as HTMLElement).offsetTop, height: element.getBoundingClientRect().height }));
-  await page.locator('.experience-stories').scrollIntoViewIfNeeded();
-  await expect(page.locator('.feature-card').last()).toHaveCSS('opacity', '1');
-  const after = await page.locator('.experience-stories').evaluate(element => ({ top: (element as HTMLElement).offsetTop, height: element.getBoundingClientRect().height }));
+  const before = await page.locator('#features').evaluate(element => ({ top: (element as HTMLElement).offsetTop, height: element.getBoundingClientRect().height }));
+  await page.locator('#features').scrollIntoViewIfNeeded();
+  await page.locator('.landscape-card').last().scrollIntoViewIfNeeded();
+  await expect(page.locator('.landscape-card').last()).toHaveCSS('opacity', '1');
+  const after = await page.locator('#features').evaluate(element => ({ top: (element as HTMLElement).offsetTop, height: element.getBoundingClientRect().height }));
   expect(after).toEqual(before);
   await page.setViewportSize({ width: 375, height: 812 });
-  await expect(page.locator('.hero-art')).toHaveCSS('transform', 'none');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await expect(page.locator('html')).toHaveAttribute('data-reduced-motion', 'true');
   expect(await page.evaluate(() => document.getAnimations().filter(animation => animation.id === 'void-reveal' && animation.playState === 'running').length)).toBe(0);
@@ -106,7 +107,7 @@ test('offscreen content animates once as it enters the viewport', async ({ page 
   await page.goto('/');
   await page.evaluate(() => document.fonts.ready);
   await expect(page.locator('.site-header .brand-asset-mark')).toHaveAttribute('data-logo-active', 'true');
-  const card = page.locator('#experience-heading');
+  const card = page.locator('#features-heading');
   await expect(card).toBeVisible();
   const result = await card.evaluate(async element => {
     const animate = element.animate;

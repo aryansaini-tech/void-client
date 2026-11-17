@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { Blocks, Crosshair, Eye, Layers, Move, Newspaper, Settings2, Shield, Sparkles, type LucideIcon } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { ArrowUpRight, Blocks, Crosshair, Eye, Layers, Move, Newspaper, Settings2, Shield, Sparkles, X, type LucideIcon } from 'lucide-react';
 import { useLiveSiteContent } from '@void/shared/content-store';
-import { faqs } from '@void/shared/content';
+import { faqs, type ClientModule } from '@void/shared/content';
 import { Badge, ButtonLink, EmptyState } from '@void/ui/components';
 import { Accordion, FilterBar, SearchField } from '@void/ui/interactive';
 
@@ -22,7 +22,16 @@ export function ModuleLibrary() {
   const modulesList = content.modules || [];
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('All');
-  
+  const [selected, setSelected] = useState<ClientModule | null>(null);
+  const dialog = useRef<HTMLDialogElement>(null);
+  const trigger = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (!selected) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    dialog.current?.showModal();
+    return () => { document.body.style.overflow = previous; };
+  }, [selected]);
   const categories = ['All', ...new Set(modulesList.map(item => item.category))];
   const filtered = modulesList.filter(item => 
     (category === 'All' || item.category === category) &&
@@ -51,6 +60,7 @@ export function ModuleLibrary() {
                 <Badge gold={item.availability === 'available'}>
                   {item.availability === 'available' ? 'Available' : 'Coming soon'}
                 </Badge>
+                <button type="button" className="module-detail-button" aria-label={`View ${item.name} details`} onClick={event => { trigger.current = event.currentTarget; setSelected(item); }}>Explore module <ArrowUpRight size={14} /></button>
               </article>
             );
           })}
@@ -68,6 +78,9 @@ export function ModuleLibrary() {
           )}
         </EmptyState>
       )}
+      <dialog ref={dialog} className="module-details" aria-labelledby="module-detail-title" aria-describedby="module-detail-description" onClick={event => { if (event.target === event.currentTarget) dialog.current?.close(); }} onClose={() => { setSelected(null); trigger.current?.focus({ preventScroll: true }); }}>
+        {selected && <><button type="button" className="icon-button" aria-label="Close module details" onClick={() => dialog.current?.close()}><X size={21} /></button><span className="mono-label">VOID / {selected.category}</span><h2 id="module-detail-title">{selected.name}</h2><p id="module-detail-description">{selected.description}</p><Badge gold={selected.availability === 'available'}>{selected.availability === 'available' ? 'Available' : 'Coming soon'}</Badge><span className="field-hint">This library describes the client module. Controls and keybinds are configured inside Minecraft.</span></>}
+      </dialog>
     </>
   );
 }

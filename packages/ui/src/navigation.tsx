@@ -19,7 +19,7 @@ function themeSnapshot(): Theme {
 function subscribeTheme(update: () => void) {
   const storage = (event: StorageEvent) => {
     if (event.key !== null && event.key !== 'void-theme') return;
-    document.documentElement.dataset.theme = event.newValue === 'light' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = event.newValue === 'dark' ? 'dark' : 'light';
     update();
   };
   window.addEventListener(themeEvent, update);
@@ -31,7 +31,7 @@ function subscribeTheme(update: () => void) {
 }
 
 export function ThemeToggle() {
-  const theme = useSyncExternalStore(subscribeTheme, themeSnapshot, (): Theme => 'dark');
+  const theme = useSyncExternalStore(subscribeTheme, themeSnapshot, (): Theme => 'light');
   function toggle() {
     const next = themeSnapshot() === 'light' ? 'dark' : 'light';
     document.documentElement.dataset.theme = next;
@@ -65,6 +65,7 @@ export function Navigation({ app = 'website' }: { app?: AppName }) {
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dialog = useRef<HTMLDialogElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
+  const previousPathname = useRef(pathname);
   const links = app === 'website' ? websiteNavigation : app === 'store' ? [
     { label: 'Store', href: storeUrl() },
     { label: 'Collection', href: storeUrl('/products') },
@@ -93,6 +94,10 @@ export function Navigation({ app = 'website' }: { app?: AppName }) {
   }, [open]);
 
   useEffect(() => {
+    // Hydration can replay a first tap before passive effects run. Only a
+    // subsequent route change should close that newly opened menu.
+    if (previousPathname.current === pathname) return;
+    previousPathname.current = pathname;
     if (closeTimer.current) clearTimeout(closeTimer.current);
     dialog.current?.close();
   }, [pathname]);

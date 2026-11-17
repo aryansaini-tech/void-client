@@ -5,6 +5,7 @@
   "exports": {
     "./tokens.css": "./tokens.css",
     "./styles.css": "./styles.css",
-    "./polish.css": "./polish.css"
+    "./polish.css": "./polish.css",
+    "./cinematic.css": "./cinematic.css"
   }
 }

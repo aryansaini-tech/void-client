@@ -4,6 +4,7 @@ import { randomBytes } from 'node:crypto';
 const database = process.env.TEST_DATABASE_URL ?? '';
 if (database && !new URL(database).pathname.endsWith('_test')) throw new Error('Browser fixtures require a disposable database ending in _test.');
 const secret = database ? (process.env.VOID_E2E_SECRET ?? randomBytes(48).toString('base64url')) : '';
+const chromiumChannel = process.env.VOID_E2E_CHROMIUM_CHANNEL || undefined;
 process.env.VOID_E2E_SECRET = secret;
 // Explicit test configuration takes precedence over a developer's root .env.
 const environment = {
@@ -28,8 +29,8 @@ export default defineConfig({
   reporter: [['list'], ['html', { open: 'never' }]],
   use: { baseURL: environment.NEXT_PUBLIC_WEBSITE_URL, trace: 'retain-on-failure', screenshot: 'only-on-failure' },
   projects: [
-    { name: 'chromium-desktop', use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 960 } } },
-    { name: 'chromium-mobile', use: { ...devices['Pixel 7'] } },
+    { name: 'chromium-desktop', use: { ...devices['Desktop Chrome'], channel: chromiumChannel, viewport: { width: 1440, height: 960 }, launchOptions: { args: ['--enable-unsafe-swiftshader'] } } },
+    { name: 'chromium-mobile', use: { ...devices['Pixel 7'], channel: chromiumChannel, launchOptions: { args: ['--enable-unsafe-swiftshader'] } } },
     { name: 'webkit-mobile', use: { ...devices['iPhone 13'] } },
   ],
   webServer: ['website', 'account', 'store'].map((app, index) => ({

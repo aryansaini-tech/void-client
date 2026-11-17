@@ -18,7 +18,7 @@ async function handler(request:Request){
     const json=request.headers.get('content-type')?.toLowerCase().split(';')[0]?.trim()==='application/json';
     if(request.method==='POST'&&!path.includes('/callback/')&&!json)throw new HttpError(415,'Use a JSON request.');
     if(request.method==='POST' && json){
-      const schema=path.endsWith('/sign-up/email')?registerSchema.passthrough():path.endsWith('/sign-in/email')?loginSchema.passthrough():z.record(z.unknown());
+      const schema=path.endsWith('/sign-up/email')?registerSchema.passthrough():path.endsWith('/sign-in/email')?loginSchema.passthrough():z.record(z.string(),z.unknown());
       const body=await readJson(request,schema);
       if(body.provider==='microsoft' && !serviceState().microsoft)throw new HttpError(503,'Microsoft sign-in is not available yet.','MICROSOFT_UNAVAILABLE');
       if(path.endsWith('/link-social')&&body.provider==='microsoft'){
