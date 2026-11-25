@@ -1,0 +1,261 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id String @id @default(cuid())
+  name String
+  email String @unique
+  emailVerified Boolean @default(false)
+  image String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  profile AccountProfile?
+  sessions Session[]
+  accounts Account[]
+  carts Cart[]
+  orders Order[]
+  activity AuditEvent[]
+}
+model AccountProfile {
+  id String @id @default(cuid())
+  userId String @unique
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  bio String @default("")
+  minecraftName String @default("")
+  reducedMotion Boolean @default(false)
+  publicProfile Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+model Session {
+  id String @id @default(cuid())
+  expiresAt DateTime
+  token String @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId String
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  @@index([userId])
+}
+model Account {
+  id String @id @default(cuid())
+  accountId String
+  providerId String
+  userId String
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  accessToken String?
+  refreshToken String?
+  idToken String?
+  accessTokenExpiresAt DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope String?
+  password String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([providerId,accountId])
+  @@index([userId])
+}
+model Verification {
+  id String @id @default(cuid())
+  identifier String
+  value String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([identifier])
+}
+model RateLimit {
+  id String @id @default(cuid())
+  key String @unique
+  count Int
+  lastRequest BigInt
+}
+model RateBucket {
+  key String @id
+  count Int @default(1)
+  resetAt DateTime
+  @@index([resetAt])
+}
+model AuditEvent {
+  id String @id @default(cuid())
+  userId String
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  action String
+  createdAt DateTime @default(now())
+  @@index([userId,createdAt])
+}
+enum EmailStatus {
+  PENDING
+  PROCESSING
+  SENT
+  FAILED
+}
+model EmailOutbox {
+  id String @id @default(cuid())
+  payload String
+  status EmailStatus @default(PENDING)
+  attempts Int @default(0)
+  availableAt DateTime @default(now())
+  lockedAt DateTime?
+  sentAt DateTime?
+  createdAt DateTime @default(now())
+  @@index([status,availableAt])
+}
+model ProductCategory {
+  id String @id @default(cuid())
+  slug String @unique
+  name String
+  description String?
+  products Product[]
+}
+model Product {
+  id String @id @default(cuid())
+  slug String @unique
+  name String
+  description String
+  price Int
+  currency String @default("usd")
+  stripePriceId String? @unique
+  images String[] @default([])
+  available Boolean @default(false)
+  published Boolean @default(false)
+  featured Boolean @default(false)
+  categoryId String
+  category ProductCategory @relation(fields:[categoryId],references:[id],onDelete:Restrict)
+  cartItems CartItem[]
+  orderItems OrderItem[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([published,available])
+}
+model Cart {
+  id String @id @default(cuid())
+  revision Int @default(0)
+  userId String @unique
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  items CartItem[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+model CartItem {
+  id String @id @default(cuid())
+  cartId String
+  cart Cart @relation(fields:[cartId],references:[id],onDelete:Cascade)
+  productId String
+  product Product @relation(fields:[productId],references:[id],onDelete:Cascade)
+  quantity Int
+  @@unique([cartId,productId])
+}
+enum OrderStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+enum FulfillmentStatus {
+  UNFULFILLED
+  FULFILLED
+  REVOKED
+}
+model Order {
+  id String @id @default(cuid())
+  userId String
+  user User @relation(fields:[userId],references:[id],onDelete:Restrict)
+  status OrderStatus @default(PENDING)
+  fulfillmentStatus FulfillmentStatus @default(UNFULFILLED)
+  subtotal Int
+  tax Int @default(0)
+  total Int
+  currency String
+  checkoutKey String @unique
+  cartFingerprint String
+  termsAcceptedAt DateTime
+  termsUrl String
+  stripeSessionId String? @unique
+  items OrderItem[]
+  payments Payment[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([userId,createdAt])
+}
+model OrderItem {
+  id String @id @default(cuid())
+  orderId String
+  order Order @relation(fields:[orderId],references:[id],onDelete:Cascade)
+  productId String
+  product Product @relation(fields:[productId],references:[id],onDelete:Restrict)
+  name String
+  quantity Int
+  unitPrice Int
+  stripePriceId String
+}
+model Payment {
+  id String @id @default(cuid())
+  orderId String
+  order Order @relation(fields:[orderId],references:[id],onDelete:Restrict)
+  provider String @default("stripe")
+  providerPaymentId String @unique
+  amount Int
+  refundedAmount Int @default(0)
+  currency String
+  status String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+model PaymentEvent {
+  id String @id
+  type String
+  processedAt DateTime @default(now())
+}
+model Module {
+  id String @id @default(cuid())
+  slug String @unique
+  name String
+  description String
+  category String
+  icon String @default("layers")
+  availability String @default("upcoming")
+  published Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+model ChangelogEntry {
+  id String @id @default(cuid())
+  version String @unique
+  title String
+  date DateTime
+  kind String
+  features String[] @default([])
+  improvements String[] @default([])
+  fixes String[] @default([])
+  notices String[] @default([])
+  published Boolean @default(false)
+}
+model Partner {
+  id String @id
+  name String
+  description String?
+  logo String?
+  website String?
+  discord String?
+  serverAddress String?
+  published Boolean @default(false)
+}
+model FAQEntry {
+  id String @id
+  category String
+  question String
+  answer String
+  published Boolean @default(false)
+  sortOrder Int @default(0)
+}

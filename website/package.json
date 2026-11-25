@@ -1,0 +1,28 @@
+{
+  "name": "void-client-website",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "start": "node server.mjs",
+    "preview": "node server.mjs",
+    "test:server": "node --test shared-account.test.mjs",
+    "db:dev": "node scripts/database-dev.mjs",
+    "verify:accounts": "node scripts/verify-account-admin-ui.mjs",
+    "release:manifest": "node scripts/release-manifest.mjs",
+    "release:scan": "node scripts/secret-scan.mjs"
+  },
+  "dependencies": {
+    "gsap": "^3.15.1",
+    "pg": "^8.23.1",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.6.0",
+    "@playwright/test": "1.56.1",
+    "vite": "7.3.8"
+  }
+}

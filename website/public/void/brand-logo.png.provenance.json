@@ -1,0 +1,68 @@
+﻿{
+    "source":  "assets/void.logo.png",
+    "sourceFormat":  "WebP RGB, opaque nominal black backdrop; despite .png extension",
+    "sourceSHA256":  "71742145e9143bc4fb801fed9e27a62e3f8e93d78394b55cf97f656e72513e6e",
+    "duplicateSource":  "launcher/assets/void.logo.png",
+    "duplicateSHA256":  "71742145e9143bc4fb801fed9e27a62e3f8e93d78394b55cf97f656e72513e6e",
+    "sourceDimensions":  [
+                             640,
+                             640
+                         ],
+    "originalAlphaBoundsExclusive":  [
+                                         0,
+                                         0,
+                                         640,
+                                         640
+                                     ],
+    "alphaRepair":  {
+                        "method":  "4-connected flood fill from canvas borders; remove alpha only where max(R,G,B)\u003c=1",
+                        "backgroundPixelsMadeTransparent":  279558,
+                        "allBackgroundRGBRetainedWithinCrop":  true,
+                        "noArtworkRGBChanges":  true
+                    },
+    "repairedAlphaBoundsExclusive":  [
+                                         100,
+                                         99,
+                                         546,
+                                         553
+                                     ],
+    "geometryDimensions":  [
+                               446,
+                               454
+                           ],
+    "candidate":  "website/qa/features-20261124/brand-logo-full.png",
+    "candidateDimensions":  [
+                                512,
+                                512
+                            ],
+    "candidateAlphaBoundsExclusive":  [
+                                          33,
+                                          29,
+                                          479,
+                                          483
+                                      ],
+    "transparentMarginsLeftTopRightBottom":  [
+                                                 33,
+                                                 29,
+                                                 33,
+                                                 29
+                                             ],
+    "canvasTranslationXY":  [
+                                -67,
+                                -70
+                            ],
+    "scaling":  false,
+    "recoloring":  false,
+    "redrawing":  false,
+    "pixelPreservation":  {
+                              "PNGEncodingRoundTripExact":  true,
+                              "allRepairedSourceBboxRGBAEqual":  true,
+                              "allArtworkRGBEqual":  true,
+                              "allNonBackgroundArtworkPixelsRetained":  true,
+                              "sourceArtworkPixels":  130042,
+                              "candidateArtworkPixels":  130042
+                          },
+    "candidateSHA256":  "55ee596c3f4a8049389cacb76d88f755da66e96a855d3505c2d3dd42dcb4ab5e",
+    "publishedAsset":  "website/public/void/brand-logo.png",
+    "publishedSHA256":  "47DA3E175619020188574A7FA1DC4AA28219C81FC4DE7125E770E8BBFE6B4D08"
+}

@@ -24,5 +24,3 @@ backend/prisma/.env
 /*.png
 Monocraft-otf/
 
-# Supplied design reference; production assets are tracked under apps/*/public/void.
-/website/

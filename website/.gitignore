@@ -1,0 +1,23 @@
+node_modules/
+dist/
+qa/*.png
+qa/*.jpg
+qa/*.json
+qa/*.mjs
+*.log
+private-data/
+oauth.env
+.env
+.env.*
+*.sqlite
+*.sqlite3
+*.db
+*.dump
+qa/
+public/landing-pages/
+public/void/textures/
+public/void/minecraft*/
+
+# Local browser profiles and automation output
+.taste-skill/
+.playwright-cli/
