@@ -1,26 +1,23 @@
 node_modules/
-.next/
-.open-next/
-.wrangler/
-out/
 dist/
-.cache/
-.turbo/
-*.tsbuildinfo
+qa/*.png
+qa/*.jpg
+qa/*.json
+qa/*.mjs
+*.log
+private-data/
+oauth.env
 .env
 .env.*
-!.env.example
-!**/.env.example
-test-results/
-playwright-report/
-coverage/
-*.log
-*.bak
-.DS_Store
-*.pem
-backend/prisma/.env
+*.sqlite
+*.sqlite3
+*.db
+*.dump
+qa/
+public/landing-pages/
+public/void/textures/
+public/void/minecraft*/
 
-# Root-level audit screenshots & raw font package (website uses apps/website/public/fonts/Monocraft.otf)
-/*.png
-Monocraft-otf/
-
+# Local browser profiles and automation output
+.taste-skill/
+.playwright-cli/

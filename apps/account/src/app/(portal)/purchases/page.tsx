@@ -1,8 +1,0 @@
-import { ShoppingBag } from 'lucide-react';
-import { getDatabase } from '@void/backend/database';
-import { site } from '@void/shared/config';
-import { formatMoney } from '@void/shared/commerce';
-import { Badge, ButtonLink, EmptyState } from '@void/ui/components';
-import { requireViewer } from '@void/account/lib/viewer';
-export const metadata={title:'Purchase history'};
-export default async function Purchases(){const viewer=await requireViewer('/purchases');const orders=await getDatabase().order.findMany({where:{userId:viewer.user.id},include:{items:{select:{name:true,quantity:true}}},orderBy:{createdAt:'desc'},take:100});return <><header className="portal-heading"><div><h1>Your journey, collected.</h1><p>Your orders and payment status, all in one place.</p></div></header>{orders.length?<div className="order-list">{orders.map(order=><a className="order-row" key={order.id} href={`${site.urls.store}/orders/${order.id}`}><div><h2>{order.items.map(item=>item.name).join(', ')}</h2><p>{order.createdAt.toLocaleDateString('en',{dateStyle:'medium',timeZone:'UTC'})} · Order {order.id.slice(-8).toUpperCase()}</p></div><div className="order-row-total"><strong>{formatMoney(order.total,order.currency)}</strong><Badge gold={order.status==='PAID'}>{order.status.replaceAll('_',' ').toLowerCase()}</Badge></div></a>)}</div>:<EmptyState title="Your collection starts here." description="You haven’t placed an order yet. Your real purchases and order updates will appear here." icon={<ShoppingBag size={29} strokeWidth={1.2}/>}><ButtonLink href={site.urls.store} variant="secondary">Explore the store</ButtonLink></EmptyState>}</>;}

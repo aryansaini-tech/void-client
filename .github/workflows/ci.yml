@@ -1,40 +1,12 @@
-name: Verify Void
-on: [push, pull_request]
+name: Verify website
+
+on:
+  push:
+  pull_request:
+
 jobs:
-  pages:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22.15.0
-          cache: npm
-      - run: npm ci
-        env:
-          PRISMA_SKIP_POSTINSTALL_GENERATE: 'true'
-      - name: Reproduce the Pages Git build command
-        run: npm run brand:prepare && npm run build --workspace=@void/website
-        env:
-          CF_PAGES: '1'
-          CF_PAGES_URL: https://preview.voidclient-website.pages.dev
-          VOID_LOCAL_PREVIEW: 'false'
-          NEXT_PUBLIC_WEBSITE_URL: https://voidclient.org
-          NEXT_PUBLIC_ACCOUNT_URL: https://voidclient.org/account
-          NEXT_PUBLIC_STORE_URL: https://voidclient.org/store
-      - run: npm run verify:pages
   verify:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:17
-        env:
-          POSTGRES_USER: void_test
-          POSTGRES_PASSWORD: test-only
-          POSTGRES_DB: void_integration_test
-        ports: ["5432:5432"]
-        options: >-
-          --health-cmd "pg_isready -U void_test -d void_integration_test"
-          --health-interval 5s --health-timeout 5s --health-retries 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -42,37 +14,5 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-        env:
-          PRISMA_SKIP_POSTINSTALL_GENERATE: 'true'
-      - name: Build the website without a pre-generated Prisma client
-        run: npm run brand:prepare && npm run build --workspace=@void/website
-        env:
-          VOID_LOCAL_PREVIEW: 'true'
-          NEXT_PUBLIC_WEBSITE_URL: http://localhost:3000
-          NEXT_PUBLIC_ACCOUNT_URL: http://localhost:3000/account
-          NEXT_PUBLIC_STORE_URL: http://localhost:3000/store
-      - run: npm run lint
-      - run: npm run typecheck
-      - run: npm test
-      - run: npm run db:deploy
-        env:
-          DATABASE_URL: postgresql://void_test:test-only@localhost:5432/void_integration_test
-          DIRECT_URL: postgresql://void_test:test-only@localhost:5432/void_integration_test
-      - run: npm run test:integration
-        env:
-          TEST_DATABASE_URL: postgresql://void_test:test-only@localhost:5432/void_integration_test
       - run: npm run build
-        env:
-          VOID_LOCAL_PREVIEW: 'true'
-          NEXT_PUBLIC_WEBSITE_URL: http://localhost:3000
-          NEXT_PUBLIC_ACCOUNT_URL: http://localhost:3000/account
-          NEXT_PUBLIC_STORE_URL: http://localhost:3000/store
-      - run: npx playwright install --with-deps chromium webkit
-      - run: npm run test:e2e
-        env:
-          TEST_DATABASE_URL: postgresql://void_test:test-only@localhost:5432/void_integration_test
-      - uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: playwright-report
-          path: playwright-report/
+      - run: npm run test:server

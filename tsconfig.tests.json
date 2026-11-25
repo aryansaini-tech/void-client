@@ -1,9 +1,0 @@
-{
-  "extends": "./packages/config/tsconfig.json",
-  "compilerOptions": {
-    "incremental": false,
-    "types": ["node"],
-    "jsx": "react-jsx"
-  },
-  "include": ["tests/**/*.ts", "scripts/**/*.ts", "playwright.config.ts"]
-}

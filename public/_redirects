@@ -1,0 +1,9 @@
+/modules /index.html 200
+/download /index.html 200
+/changelog /index.html 200
+/discord /index.html 200
+/store /index.html 200
+/store/* /index.html 200
+/account /index.html 200
+/admin /index.html 200
+/admin/* /index.html 200

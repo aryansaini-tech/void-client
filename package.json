@@ -1,67 +1,28 @@
 {
-  "name": "void-client",
-  "version": "1.0.0",
+  "name": "void-client-website",
   "private": true,
+  "version": "1.0.0",
   "type": "module",
-  "workspaces": [
-    "apps/*",
-    "packages/*",
-    "backend"
-  ],
-  "engines": {
-    "node": ">=22.15.0 <27"
-  },
   "scripts": {
-    "brand:prepare": "node scripts/prepare-brand.mjs",
-    "cinematic:prepare": "node scripts/prepare-cinematic.mjs",
-    "verify:cinematic": "playwright test tests/e2e/cinematic.spec.ts",
-    "setup": "npm install && npm run db:generate",
-    "dev": "node scripts/workspaces.mjs dev",
-    "dev:website": "npm run dev --workspace=@void/website",
-    "dev:account": "npm run dev --workspace=@void/account",
-    "dev:store": "npm run dev --workspace=@void/store",
-    "dev:backend": "npm run dev --workspace=@void/backend",
-    "build": "npm run db:generate && node scripts/workspaces.mjs build",
-    "build:cloudflare": "npm run db:generate && npm run brand:prepare && node scripts/patch-opennext.mjs && npm run build:worker --workspace=@void/website && node scripts/prepare-pages.mjs --package-only",
-    "build:pages": "node scripts/prepare-pages.mjs --build",
-    "verify:pages": "node scripts/verify-pages.mjs",
-    "deploy:cloudflare": "npm run build:cloudflare && npm run deploy:worker --workspace=@void/website",
-    "patch:opennext": "node scripts/patch-opennext.mjs",
-    "start": "node scripts/workspaces.mjs start",
-    "lint": "eslint apps packages backend tests scripts",
-    "typecheck": "npm run db:generate && node scripts/workspaces.mjs typecheck",
-    "test": "node --import ./scripts/register-typescript.mjs --test --test-isolation=none tests/unit/*.test.ts",
-    "test:integration": "node --import ./scripts/register-typescript.mjs --test --test-isolation=none tests/integration/*.test.ts",
-    "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui",
-    "db:generate": "prisma generate --schema backend/prisma/schema.prisma",
-    "db:migrate": "prisma migrate dev --schema backend/prisma/schema.prisma",
-    "db:deploy": "prisma migrate deploy --schema backend/prisma/schema.prisma",
-    "db:seed": "node --env-file-if-exists=.env --import ./scripts/register-typescript.mjs backend/prisma/seed.ts",
-    "db:studio": "prisma studio --schema backend/prisma/schema.prisma",
-    "check:config": "node --env-file-if-exists=.env --import ./scripts/register-typescript.mjs scripts/check-config.ts",
-    "test:http": "node --import ./scripts/register-typescript.mjs --test --test-isolation=none tests/smoke/*.test.ts"
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "start": "node server.mjs",
+    "preview": "node server.mjs",
+    "test:server": "node --test shared-account.test.mjs",
+    "db:dev": "node scripts/database-dev.mjs",
+    "verify:accounts": "node scripts/verify-account-admin-ui.mjs",
+    "release:manifest": "node scripts/release-manifest.mjs",
+    "release:scan": "node scripts/secret-scan.mjs"
+  },
+  "dependencies": {
+    "gsap": "^3.15.1",
+    "pg": "^8.23.1",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
   },
   "devDependencies": {
-    "@opennextjs/cloudflare": "1.20.17",
-    "@playwright/test": "^1.56.1",
-    "@types/node": "^22.20.1",
-    "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.7",
-    "eslint": "9.39.5",
-    "eslint-config-next": "16.4.6",
-    "prisma": "6.19.3",
-    "sharp": "0.35.5",
-    "tsx": "^4.20.6",
-    "typescript": "5.9.3",
-    "typescript-eslint": "8.73.0",
-    "wrangler": "4.164.0",
-    "zod": "4.6.7"
-  },
-  "overrides": {
-    "deepmerge-ts": "8.0.2",
-    "@opennextjs/cloudflare": {
-      "glob": "14.0.6"
-    }
+    "@electric-sql/pglite": "^0.6.0",
+    "@playwright/test": "1.56.1",
+    "vite": "7.3.8"
   }
 }

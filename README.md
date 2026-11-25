@@ -1,98 +1,96 @@
-# VOID CLIENT
+# VOID website
 
-**PLAY BEYOND LIMITS.**
+Implementation awaits owner verification. See [STATUS.md](STATUS.md) for local test evidence, blockers, commits and the verification checklist. Real purchasing is not live. The client DLL and cape rendering are outside this change.
 
-A cinematic Minecraft Bedrock ecosystem: a live river valley, nine scroll camera chapters, Champagne glass surfaces, licensed Monocraft branding, a secure account portal, and a store with server-priced Stripe Checkout. The website serves `/store` and `/account` by importing the existing app routes and services. The standalone account and store builds remain available.
+The website uses React/Vite and a Node.js HTTP server. Source and package files are at the repository root. The website is the Discord OAuth client; PostgreSQL stores the catalogue, commerce records, accounts, cosmetics, sessions and audit data. Compatible native launcher clients can sign in through the website with PKCE.
 
-The repository root is the existing `void-client` monorepo. The supplied reference's renderer, world assets, and cloth equations are adapted and attributed in `apps/website/public/void/CREDITS.txt`.
+## Website setup
 
-The redesign adapts the supplied `website/website` reference into the existing applications. It retains the official logos, authentication, APIs, cart and checkout, with a shared landscape and glass design across every route. Champagne is the default; saved dark and reduced-motion preferences remain supported. See [the cinematic implementation and reference audit](docs/cinematic-transformation.md), [verification](docs/testing.md), and [Microsoft configuration](docs/microsoft-login.md).
-
-## Start locally
-
-Use Node.js **22.15+ or 24 LTS** and npm. From this directory:
+Use Node.js 24 LTS. Run these commands from the repository root:
 
 ```sh
-npm install
-npm run db:generate
-npm run dev
+npm ci
+npm run build
 ```
 
-No credentials are required to preview all public pages. Account operations and checkout clearly explain their unavailable state until configured. Copy `.env.example` to `.env` to configure services; restart the apps after changing environment variables.
+The production frontend is written to `dist`. `npm run dev` starts the Vite development frontend. `npm start` serves the built frontend and the Node account APIs.
 
-| Application | Local address | Production domain |
-| --- | --- | --- |
-| Website | http://localhost:3000 | https://voidclient.org |
-| Account | http://localhost:3000/account | https://voidclient.org/account |
-| Store | http://localhost:3000/store | https://voidclient.org/store |
-| Backend / mail worker | http://localhost:3003/health | Private service; no public domain required |
+## Hosting
 
-For authentication, start PostgreSQL and a local inbox with `docker compose up -d`, set the values described in [local development](docs/development.md), then run `npm run db:deploy`. The backend worker delivers verification and recovery messages. Checkout additionally requires genuine products, approved policy URLs, and Stripe credentials.
+For Cloudflare Pages, set the root directory to the repository root, the build command to `npm run build`, and the build output directory to `dist`. Use Node.js 24 for the build. The included `wrangler.jsonc` declares the Pages output directory. If the existing Pages project still has the former workspace build command or `apps/website/out` output saved in its dashboard, replace those settings. The included SPA redirects serve direct visits to the website's routes.
 
-`npm run dev:website` previews all three areas. Ports 3001 and 3002 still run the standalone account/store applications with their original root routes. The integrated website requires a Next.js server; static export cannot run authentication or checkout. See [single-origin routing and migration notes](docs/single-origin.md) before changing any hosting configuration.
+Cloudflare Pages serves this frontend as static files. Discord sign-in, account and admin data, downloads, and payment webhooks require the Node server and its private configuration. For the complete website, use a Node.js 24 host with PostgreSQL connectivity, build using `npm ci && npm run build`, and start using `npm start`. Set `NODE_ENV=production`, `VOID_ORIGIN` to the public HTTPS origin, and the server-only settings below. The server accepts the host's `PORT`; `VOID_PORT` overrides it. Set `VOID_HOST=0.0.0.0` when binding to the hosting platform's network interface.
 
-## Repository
-
-```text
-apps/
-  website/                 Product website and original SVG concept artwork
-  account/                 Better Auth endpoints and protected account portal
-  store/                   Product catalog, cart, checkout, orders, Stripe webhook
-packages/
-  ui/                      Shared brand, navigation, dialogs, motion, components
-  design-system/           Palette, typography, responsive layout and effects
-  shared/                  Editorial content, public URLs, schemas, money helpers
-  config/                  Next.js, Tailwind and TypeScript configuration
-backend/
-  src/                     Auth, PostgreSQL, encrypted mail queue, commerce, HTTP worker
-  prisma/                  Schema, initial migration, editorial draft seed
-scripts/                   Workspace runner, configuration checks, test loader
-tests/                     Unit, database integration and browser checks
-docs/                      Architecture, setup, content, security, deployment, QA
-```
-
-## Applications and behavior
-
-- **Website:** Home, Modules, Download, Discord, Changelog, Sneak Peeks, Partners, FAQ, About; searchable libraries, accessible filters/accordions, gallery lightbox, showcase tabs, partner-address copy controls, mobile navigation, metadata, Open Graph images, robots and sitemap.
-- **Account:** Login, registration, forgot/reset password, email verification, dashboard, profile, security, settings, Discord linking, purchase history, and opt-in public profiles. Password hashing, email verification, persistent sessions, rate limits, session revocation and reset flows use Better Auth and PostgreSQL.
-- **Store:** Homepage, collection, categories, category/product detail routes, search, persistent guest and account carts, checkout, order confirmation/status and purchase history. Account carts use revision checks; stale updates are rejected. Stripe receives product Price IDs from the server. Signed webhooks record payments transactionally and deduplicate events.
-- **Motion:** Browser-native reveals, preview crossfades, gold shine, restrained magnetic controls, lightweight scroll-linked artwork, and route transitions. Scrolling stays native; content remains readable with reduced motion or JavaScript disabled. See [the UI repair notes](docs/ui-polish.md) and [the integration notes](docs/single-origin.md).
-
-Technology: Next.js 16.4.6, React 19.3.1, TypeScript, Tailwind, Framer Motion, GSAP, Lucide, Prisma 6.19.3, PostgreSQL, Better Auth 1.7.15, Hono, Nodemailer and Stripe. Manrope and Monocraft are self-hosted; no runtime font CDN is needed. See [architecture](docs/architecture.md).
-
-## Commands
+The included Dockerfile builds the frontend and installs production dependencies in a separate Node.js 24 runtime image:
 
 ```sh
-npm run dev                  # all apps and the backend
-npm run dev:website          # or dev:account, dev:store, dev:backend
-npm run build                # all production builds
-npm run build:pages          # Cloudflare Pages server and assets in apps/website/out
-npm run verify:pages         # checks the Pages artifact in local workerd
-npm run start                # all production servers
-npm run lint
-npm run typecheck
-npm test
-npm run test:integration      # requires TEST_DATABASE_URL ending in _test
-npm run test:http             # checks running production servers on 3000–3002
-npm run test:e2e              # install Playwright browsers first
-npm run db:generate
-npm run db:deploy             # apply committed migrations
-npm run db:migrate            # author a new development migration
-npm run db:seed               # editorial drafts only
-npm run check:config          # readiness without printing secrets
-npm run brand:prepare         # distribute the supplied logos and derived artwork
-npm run cinematic:prepare     # regenerate world assets from the supplied local reference
-npm run verify:cinematic      # targeted camera, fallback, motion and cloth checks
+docker build -t void-website .
 ```
 
-See [the testing report](docs/testing.md) for actual results and environment limitations. The report distinguishes executed checks from tests requiring provider credentials or real devices.
+Supply production environment settings privately when starting the image. It listens on port 3000 by default and does not run database migrations. Changing repository source does not configure a hosting provider or verify deployed account and payment behavior.
 
-## Content and launch requirements
+## Server and database setup
 
-No client modules, releases, supported versions, installation requirements, downloadable files, products, prices, reviews, community counts, or partner contact details have been invented. Zerix Network is a pending entry with supplied artwork; its links and address remain empty. The showcase contains **clearly labelled original concepts**, not actual client screenshots. The default store is empty.
+Set private server configuration using your host's environment/secret settings. For local use, a restricted `private-data/oauth.env` file is supported; it must stay outside the served `dist` directory and Git. Never use `VITE_*` for credentials. No credential values belong in commands saved to history, logs, screenshots or source.
 
-The supplied logos and Discord invitation are configured. Before launch, supply verified client content and download links, real screenshots, partner details, genuine product/Stripe Price records, approved legal URLs, PostgreSQL, SMTP, a random auth secret, Microsoft application credentials, Stripe keys/webhook configuration, and optional Discord OAuth credentials. Product fulfillment needs the actual entitlement/delivery integration; payment and fulfillment statuses are deliberately separate.
+For a NEW local embedded PostgreSQL database, configure `VOID_DEV_DATABASE_PATH` to a new directory under private data, leave `DATABASE_URL` unset, then run:
 
-Use [content editing](docs/content.md), [environment reference](docs/environment.md), [security](docs/security.md), and [deployment and DNS](docs/deployment.md). Hosting, domain registration, DNS changes, payment processing, and external email delivery are not performed by this repository setup.
+```sh
+npm run db:dev
+npm start
+```
 
-Design references and licensing notes: [resources](docs/resources.md).
+The development initializer refuses an existing directory and production mode. It uses the archived legacy initial schema only for new development data. It never opens production. Embedded development mode needs dev dependencies installed. Alternatively, use a separate PostgreSQL database restored from an encrypted verified backup.
+
+Production uses the existing `DATABASE_URL` after the explicitly approved additive migration. Startup checks the migration version and never runs migrations. Read [DATABASE-ROLLOUT.md](docs/DATABASE-ROLLOUT.md) before any real database change. Hosting migration and deployed configuration are NOT VERIFIED.
+
+Configure Discord's existing website callback at `/auth/discord/callback` for the public website origin. The launcher uses that website flow and requires no additional Discord redirect. OAuth requests only `identify`, never email. Xbox is disabled and shows Coming soon.
+
+Before live use, configure host/proxy logging to omit authentication callback query strings and redact Authorization, Cookie and CSRF headers. Do not log auth, token-exchange, webhook or admin request/response bodies. The Node application emits fixed startup errors and does not log request URLs or tokens; the external hosting configuration still needs owner verification.
+
+## Environment variable names
+
+| Names | Purpose |
+| --- | --- |
+| `DATABASE_URL` | Existing production PostgreSQL connection or separate PostgreSQL development connection; private. |
+| `DIRECT_URL` | Legacy Prisma direct connection used by legacy deployment tooling; not used by this Node runtime. |
+| `VOID_DEV_DATABASE_PATH` | Explicit local embedded PostgreSQL path; cannot be used in production. |
+| `VOID_ORIGIN`, `VOID_HOST`, `VOID_PORT`, `PORT`, `NODE_ENV` | Public HTTPS origin and server binding/mode. `VOID_PORT` takes precedence over the hosting platform's `PORT`. |
+| `VOID_DISCORD_CLIENT_ID`, `VOID_DISCORD_CLIENT_SECRET` | Server-only Discord OAuth app configuration. |
+| `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET` | Supported legacy configuration aliases when VOID names are absent. |
+| `VOID_ADMIN_DISCORD_IDS` | Private comma-separated Discord ID allowlist. It is the sole source of admin access. |
+| `STRIPE_WEBHOOK_SECRET` | Server-only Stripe signature-verification secret. |
+| `STRIPE_SECRET_KEY`, `STORE_CHECKOUT_ENABLED` | Legacy provider/checkout settings; new checkout is not implemented or enabled by them. |
+| `VOID_INSTALLER_PATH` | Private installer location, outside public build assets. |
+| `VOID_WEBSITE_ORIGIN` | Public launcher website origin (launcher environment or CMake cache option). |
+
+Legacy environment names are inventoried separately in [LEGACY_INSPECTION.md](docs/LEGACY_INSPECTION.md). No Microsoft credentials are used by the new website account flow.
+
+## Account and admin
+
+Sign in with Discord at `/account`. Owned items, equipped state and device tokens come from authenticated server endpoints. Equipment requires active ownership; ordinary store items without an equip slot cannot be equipped. Account deletion disconnects identities and sessions and anonymises personal data while retaining legally required commerce records.
+
+The admin area is `/admin`, with no public navigation link. Every page and API checks `VOID_ADMIN_DISCORD_IDS` server-side. There is no password admin, role-edit form or admin-creation API. Search/sort/page through players, inspect read-only payment references, confirm grants/removals and review the immutable audit log. Removing a purchase does not refund it; revoked equipment is cleared. Admin responses use no-store caching. Never put secrets or personal contact/IP data into grant notes or revocation reasons.
+
+The Stripe webhook is `/api/webhooks/stripe`. It checks the raw-body signature, timestamp, order/user/session references and totals, then handles entitlements transactionally and idempotently. Historic purchases require verified provider event redelivery or an allowlisted owner/admin grant. No browser or launcher button grants purchases. Production payment processing must be verified in provider test mode before activation; there is no live checkout in this release.
+
+## Launcher clients
+
+Compatible launcher clients use the website's Discord flow and launcher session endpoints. The launcher origin must point to the deployed Node website. This repository contains website source; native launcher and client builds are maintained separately. No client DLL is published by this source rollout.
+
+## Local verification
+
+```sh
+npm run test:server
+npm run verify:accounts
+npm run release:manifest
+npm run release:scan
+```
+
+The server tests use isolated embedded PostgreSQL fixtures and synthetic provider replies. Browser tests use synthetic API responses and check account/admin/store interactions at desktop and phone widths. They establish local code behavior only. A real Discord login, deployed DB, provider webhook, launcher client flow, device sharing and ownership changes still require owner verification. Build outputs remain private and excluded.
+
+Review the exact manifest and scan working files and new commits before publication. Use a normal commit and push, retaining a backup branch before replacing an existing site. See [PUBLISH.md](docs/PUBLISH.md), [RELEASE_FILES.txt](docs/RELEASE_FILES.txt) and [STATUS.md](STATUS.md). Never force-push.
+
+## Dependencies
+
+See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and the included dependency licenses. No Mojang game assets, client DLL source, private data, environment files, reference captures, disassembly or build binaries are part of the proposed release.

@@ -1,9 +1,5 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
   "name": "voidclient-website",
-  "pages_build_output_dir": "apps/website/out",
-  "compatibility_date": "2026-03-01",
-  "compatibility_flags": [
-    "nodejs_compat"
-  ]
+  "pages_build_output_dir": "dist",
+  "compatibility_date": "2026-11-25"
 }
