@@ -1,6 +1,7 @@
 FROM node:24-bookworm-slim AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
+COPY hosting/website/package.json hosting/website/package.json
 RUN npm ci
 COPY index.html vite.config.js ./
 COPY src ./src
@@ -11,6 +12,7 @@ FROM node:24-bookworm-slim AS runtime
 WORKDIR /app
 ENV NODE_ENV=production VOID_HOST=0.0.0.0 PORT=3000
 COPY package.json package-lock.json ./
+COPY hosting/website/package.json hosting/website/package.json
 RUN npm ci --omit=dev
 COPY --from=build --chown=node:node /app/dist ./dist
 COPY --chown=node:node server.mjs shared-server.mjs shared-auth.mjs account-store.mjs database.mjs payments.mjs ./

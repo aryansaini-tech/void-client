@@ -17,7 +17,7 @@ The production frontend is written to `dist`. `npm run dev` starts the Vite deve
 
 ## Hosting
 
-For Cloudflare Pages, set the root directory to the repository root, the build command to `npm run build`, and the build output directory to `dist`. Use Node.js 24 for the build. The included `wrangler.jsonc` declares the Pages output directory. If the existing Pages project still has the former workspace build command or `apps/website/out` output saved in its dashboard, replace those settings. The included SPA redirects serve direct visits to the website's routes.
+For Cloudflare Pages, set the root directory to the repository root, the build command to `npm run build`, and the build output directory to `dist`. Use Node.js 24 for the build. The included `wrangler.jsonc` declares the Pages output directory. The existing saved build command `npm run brand:prepare && npm run build --workspace=@void/website` also builds this root app through a compatibility workspace. Both commands write to `dist`; replace any old `apps/website/out` output setting. The included SPA redirects serve direct visits to the website's routes.
 
 Cloudflare Pages serves this frontend as static files. Discord sign-in, account and admin data, downloads, and payment webhooks require the Node server and its private configuration. For the complete website, use a Node.js 24 host with PostgreSQL connectivity, build using `npm ci && npm run build`, and start using `npm start`. Set `NODE_ENV=production`, `VOID_ORIGIN` to the public HTTPS origin, and the server-only settings below. The server accepts the host's `PORT`; `VOID_PORT` overrides it. Set `VOID_HOST=0.0.0.0` when binding to the hosting platform's network interface.
 

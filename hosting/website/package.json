@@ -1,0 +1,8 @@
+{
+  "name": "@void/website",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "npm --prefix ../.. run build --workspaces=false"
+  }
+}

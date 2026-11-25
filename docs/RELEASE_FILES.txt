@@ -55,6 +55,7 @@ docs/RELEASE_FILES.txt
 docs/RELEASE_NOTICES.md
 docs/RELEASE_README.md
 docs/UI-API-REVIEW.md
+hosting/website/package.json
 index.html
 package-lock.json
 package.json
@@ -80,6 +81,7 @@ public/void/taste/moments/word-highlight/moment.js
 public/void/taste/motion/motion.css
 public/void/taste/motion/motion.js
 scripts/database-dev.mjs
+scripts/prepare-brand.mjs
 scripts/release-manifest.mjs
 scripts/secret-scan.mjs
 scripts/stage-release.mjs

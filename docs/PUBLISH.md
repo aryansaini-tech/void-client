@@ -31,7 +31,7 @@ Configure the existing Pages project with these settings:
 | Build output directory | `dist` |
 | Build Node.js version | `24` |
 
-The repository's `wrangler.jsonc` declares `dist` as the Pages output directory. Replace any former workspace build command or `apps/website/out` value saved in the hosting dashboard. SPA redirects are copied from `public/_redirects` into the build.
+The repository's `wrangler.jsonc` declares `dist` as the Pages output directory. The previously saved command `npm run brand:prepare && npm run build --workspace=@void/website` is also supported: the compatibility workspace forwards to the root Vite build. The output directory is `dist` for both commands. Replace any old `apps/website/out` output value saved in the hosting dashboard. SPA redirects are copied from `public/_redirects` into the build.
 
 Pages serves the static frontend. The Node account/admin APIs, Discord callback, downloads and payment webhook need a Node.js 24 host and private server settings; they do not run in Pages from this source unchanged.
 

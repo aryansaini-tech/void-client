@@ -12,7 +12,8 @@
     "db:dev": "node scripts/database-dev.mjs",
     "verify:accounts": "node scripts/verify-account-admin-ui.mjs",
     "release:manifest": "node scripts/release-manifest.mjs",
-    "release:scan": "node scripts/secret-scan.mjs"
+    "release:scan": "node scripts/secret-scan.mjs",
+    "brand:prepare": "node scripts/prepare-brand.mjs"
   },
   "dependencies": {
     "gsap": "^3.15.1",
@@ -24,5 +25,8 @@
     "@electric-sql/pglite": "^0.6.0",
     "@playwright/test": "1.56.1",
     "vite": "7.3.8"
-  }
+  },
+  "workspaces": [
+    "hosting/website"
+  ]
 }
